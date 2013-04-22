@@ -6,12 +6,16 @@ package CljPerl::Eval;
   use CljPerl::Var;
   use CljPerl::Printer;
   use File::Spec;
+  use File::Basename;
 
   sub new {
     my $class = shift;
     my @scopes = ({});
+    my @file_stack = ();
     my $self = {class=>$class,
                 scopes=>\@scopes,
+                loaded_files=>{},
+                file_stack=>\@file_stack,
                 syntaxquotation_scope=>0};
     bless $self;
     return $self;
@@ -57,17 +61,29 @@ package CljPerl::Eval;
     return undef;
   }
 
-  our $loaded_files = {};
+  sub current_file {
+    my $self = shift;
+    my $sd = scalar @{$self->{file_stack}};
+    if($sd == 0) {
+      return ".";
+    } else {
+      return ${$self->{file_stack}}[$sd-1];
+    }
+  }
 
   sub load {
     my $self = shift;
     my $file = shift;
-    $file = File::Spec->rel2abs($file);
-    return 1 if exists $loaded_files->{$file};
-    $loaded_files->{$file} = 1;
+    if($file =~ /^[^\/]/){
+      $file = dirname($self->current_file()) . "/$file";
+    };
+    return 1 if exists $self->{loaded_files}->{$file};
+    $self->{loaded_files}->{$file} = 1;
+    push @{$self->{file_stack}}, $file;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
     $reader->ast()->each(sub {$self->_eval($_[0])});
+    pop @{$self->{file_stack}};
     return 1;
   }
 
@@ -131,77 +147,7 @@ package CljPerl::Eval;
       };
       my $f = $self->_eval($ast->first());
       if($f->type() eq "symbol") {
-        my $fn = $f->value();
-        if($fn eq "def") {
-          $ast->error("def expects 2 arguments") if $ast->size() != 3;
-          my $name = $ast->second()->value();
-          my $value = $self->_eval($ast->third());
-          $self->new_var($name, $value);
-        } elsif($fn eq "fn") {
-          $ast->error("fn expects >= 3 arguments") if $ast->size() < 3;
-          my $args = $ast->second();
-          $ast->error("fn expects [arg ...] as formal argument list") if $args->type() ne "vector";
-          my $i = 0;
-          foreach my $arg (@{$args->value()}) {
-            $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
-            if($arg->value() eq "&"
-               and ($args->size() != $i + 2 or $args->value()->[$i+1]->value() eq "&")) {
-              $arg->error("only 1 non-& should follow &");
-            };
-            $i ++;
-          }
-          my $nast = CljPerl::Atom->new("function");
-          $nast->value($ast);
-	  $nast->{context} = \%{$self->current_scope()};
-          return $nast;
-        } elsif($fn eq "defmacro") {
-          $ast->error("defmacro expects >= 4 arguments") if $ast->size() < 4;
-	  my $name = $ast->second()->value();
-          my $args = $ast->third();
-          $ast->error("defmacro expect [arg ...] as formal argument list") if $args->type() ne "vector";
-          my $i = 0;
-          foreach my $arg (@{$args->value()}) {
-            $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
-            if($arg->value() eq "&" 
-               and ($args->size() != $i + 2 or $args->value()->[$i+1]->value() eq "&")) {
-              $arg->error("only 1 non-& should follow &");
-            };
-            $i ++;
-          }
-          my $nast = CljPerl::Atom->new("macro");
-          $nast->value($ast);
-	  $nast->{context} = \%{$self->current_scope()};
-          $self->new_var($name, $nast);
-          return $nast;
-        } elsif($fn eq "require") {
-          $ast->error("require expects 1 argument") if $ast->size() != 2;
-          my $m = $ast->second();
-          $ast->error("require expects a string") if $m->type() ne "string";
-          $self->load($m->value());
-        } elsif($fn =~ /^\.(\S*)$/) {
-          my $ns = $1;
-          $ast->error(". expects > 1 arguments") if $ast->size() < 2;
-          my $perl_func = $ast->second()->value();
-          if($perl_func eq "require") {
-            $ast->error(". require expects 1 argument") if $ast->size() != 3;
-            my $m = $ast->third();
-            $ast->error(". require expects a string") if $m->type() ne "string";
-            require $m->value();
-          } else {
-            $ns = "CljPerl" if ! defined $ns or $ns eq "";
-            $perl_func = $ns . "::" . $perl_func;
-            my @rest = $ast->slice(2 .. $ast->size()-1);
-            my $args = ();
-            foreach my $r (@rest) {
-              push @{$args}, $r->value();
-            };
-            my $res = $perl_func->(@{$args});
-            return $res;
-          }
-        } elsif($fn eq "println") {
-          $ast->error("println expects 1 argument") if $ast->size() != 2;
-          print CljPerl::Printer::to_string($self->_eval($ast->second())) . "\n";
-	};
+	return $self->builtin($ast);
       } elsif($f->type() eq "function") {
         my $scope = $f->{context};
         $f = $f->value();
@@ -284,4 +230,85 @@ package CljPerl::Eval;
     };
     return $ast;
   }
+
+  sub builtin {
+    my $self = shift;
+    my $ast = shift;
+    my $f = $ast->first();
+    my $fn = $f->value();
+    if($fn eq "def") {
+      $ast->error("def expects 2 arguments") if $ast->size() != 3;
+      my $name = $ast->second()->value();
+      my $value = $self->_eval($ast->third());
+      $self->new_var($name, $value);
+    } elsif($fn eq "fn") {
+      $ast->error("fn expects >= 3 arguments") if $ast->size() < 3;
+      my $args = $ast->second();
+      $ast->error("fn expects [arg ...] as formal argument list") if $args->type() ne "vector";
+      my $i = 0;
+      foreach my $arg (@{$args->value()}) {
+        $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
+        if($arg->value() eq "&"
+           and ($args->size() != $i + 2 or $args->value()->[$i+1]->value() eq "&")) {
+          $arg->error("only 1 non-& should follow &");
+        };
+        $i ++;
+      }
+      my $nast = CljPerl::Atom->new("function");
+      $nast->value($ast);
+      $nast->{context} = \%{$self->current_scope()};
+      return $nast;
+    } elsif($fn eq "defmacro") {
+      $ast->error("defmacro expects >= 4 arguments") if $ast->size() < 4;
+      my $name = $ast->second()->value();
+      my $args = $ast->third();
+      $ast->error("defmacro expect [arg ...] as formal argument list") if $args->type() ne "vector";
+      my $i = 0;
+      foreach my $arg (@{$args->value()}) {
+        $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
+        if($arg->value() eq "&"
+           and ($args->size() != $i + 2 or $args->value()->[$i+1]->value() eq "&")) {
+          $arg->error("only 1 non-& should follow &");
+        };
+        $i ++;
+      }
+      my $nast = CljPerl::Atom->new("macro");
+      $nast->value($ast);
+      $nast->{context} = \%{$self->current_scope()};
+      $self->new_var($name, $nast);
+      return $nast;
+    } elsif($fn eq "require") {
+      $ast->error("require expects 1 argument") if $ast->size() != 2;
+      my $m = $ast->second();
+      $ast->error("require expects a string") if $m->type() ne "string";
+      $self->load($m->value());
+    } elsif($fn =~ /^\.(\S*)$/) {
+      my $ns = $1;
+      $ast->error(". expects > 1 arguments") if $ast->size() < 2;
+      my $perl_func = $ast->second()->value();
+      if($perl_func eq "require") {
+        $ast->error(". require expects 1 argument") if $ast->size() != 3;
+        my $m = $ast->third();
+        $ast->error(". require expects a string") if $m->type() ne "string";
+        require $m->value();
+      } else {
+        $ns = "CljPerl" if ! defined $ns or $ns eq "";
+        $perl_func = $ns . "::" . $perl_func;
+        my @rest = $ast->slice(2 .. $ast->size()-1);
+        my $args = ();
+        foreach my $r (@rest) {
+          push @{$args}, $r->value();
+        };
+        my $res = $perl_func->(@{$args});
+        return $res;
+      }
+    } elsif($fn eq "println") {
+      $ast->error("println expects 1 argument") if $ast->size() != 2;
+      print CljPerl::Printer::to_string($self->_eval($ast->second())) . "\n";
+    };
+  
+    return $ast;
+  }
+  
+
 1;
