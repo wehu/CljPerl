@@ -1,0 +1,15 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/CljPerl.t
+t/basic_syntax.clp
+bin/cljp
+lib/CljPerl.pm
+lib/CljPerl/Atom.pm
+lib/CljPerl/Eval.pm
+lib/CljPerl/Logger.pm
+lib/CljPerl/Printer.pm
+lib/CljPerl/Reader.pm
+lib/CljPerl/Seq.pm
+lib/CljPerl/Var.pm
