@@ -1,4 +1,4 @@
-== CljPerl
+### CljPerl
 
 CljPerl is a lisp implemented by Perl. It borrows the idea from Clojure,
 which makes a seamless connection with Java packages.
@@ -8,9 +8,9 @@ However, programming in lisp is more insteresting.
 CljPerl is a bridge between lisp and perl. We can program in lisp and
 make use of the great resource from CPAN.
 
-== Example
+### Example
 
-	# file t.clp
+	;; file t.clp
 	(defmacro defn [name args & body]
 	  `(def ~name
 	     (fn ~args ~@body)))
