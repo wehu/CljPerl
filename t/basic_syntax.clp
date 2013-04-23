@@ -88,3 +88,18 @@
 (println (. print "bbb\n"))
 
 (println (eval "(+ 1 2)"))
+
+(def ^{:a 'b} m 1)
+(println (meta m))
+(println (type m))
+(:a (meta m) 'c)
+(println (meta m))
+
+(require "../lib/core.clp")
+
+(defmulti mf (fn [a] a))
+(println (meta mf))
+(defmethod mf :a [] (println :a))
+(println (meta mf))
+(mf :a)
+

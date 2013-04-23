@@ -185,8 +185,9 @@ package CljPerl::Reader;
         return $self->dispatch();
       } elsif($c eq '^') {
         $self->consume(1);
+        $self->error("meta should be a map") if $self->peekc() ne "{";
         my $md = $self->lex();
-	$md->type("metadata");
+	$md->type("meta");
 	return $md;
       } elsif($c eq ':') {
         $self->consume(1);
@@ -343,7 +344,7 @@ package CljPerl::Reader;
 	    and $c ne '[' and $c ne ']'
 	    and $c ne '{' and $c ne '}') {
           $self->error("unexpected letter " . $c . " for symbol")
-            if $c =~ /[^0-9a-zA-Z_!&\?\*\/\.\+\|=%\$<>#@\:]/;
+            if $c =~ /[^0-9a-zA-Z_!&\?\*\/\.\+\|=%\$<>#@\:\-]/;
           $sym->{value} .= $c;
 	  $self->consume(1);
 	} else {

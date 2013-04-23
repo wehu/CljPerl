@@ -14,6 +14,7 @@ package CljPerl::Atom;
     my $self = {class=>"Atom",
 	        type=>$type,
 	        value=>$value,
+                meta=>{},
 	        pos=>{filename=>"unknown",
 		      line=>0,
 	              col=>0}};
@@ -33,6 +34,16 @@ package CljPerl::Atom;
       $self->{type} = $type;
     } else {
       return $self->{type};
+    }
+  }
+
+  sub meta {
+    my $self = shift;
+    my $meta = shift;
+    if(defined $meta) {
+      $self->{meta} = $meta;
+    } else {
+      return $self->{meta};
     }
   }
 

@@ -14,6 +14,7 @@ package CljPerl::Seq;
     my $self = {class=>"Seq",
 	        type=>$type,
                 value=>\@seq,
+                meta=>{},
                 pos=>{filename=>"unknown",
 		      line=>0,
 	              col=>0}};
@@ -33,6 +34,16 @@ package CljPerl::Seq;
       $self->{type} = $type;
     } else {
       return $self->{type};
+    }
+  }
+
+  sub meta {
+    my $self = shift;
+    my $meta = shift;
+    if(defined $meta) {
+      $self->{meta} = $meta;
+    } else {
+      return $self->{meta};
     }
   }
 
