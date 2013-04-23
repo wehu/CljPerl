@@ -6,7 +6,7 @@ use warnings;
 
 require Exporter;
 
-use CljPerl::Eval;
+use CljPerl::Evaler;
 
 our @ISA = qw(Exporter);
 

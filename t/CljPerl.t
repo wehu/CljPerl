@@ -6,7 +6,7 @@
 use Test::More tests=>3;
 BEGIN { use_ok('CljPerl') };
 
-my $test = CljPerl::Eval->new();
+my $test = CljPerl::Evaler->new();
 
 ok($test->load("t/basic_syntax.clp"), 'basic syntax');
 

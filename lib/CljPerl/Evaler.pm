@@ -1,4 +1,4 @@
-package CljPerl::Eval;
+package CljPerl::Evaler;
 
 #  use strict;
   use warnings;
