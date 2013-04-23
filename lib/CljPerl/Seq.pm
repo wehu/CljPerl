@@ -81,6 +81,12 @@ package CljPerl::Seq;
     return $self->{value}->[2];
   }
 
+  sub fourth {
+    my $self = shift;
+    return undef if($self->size() < 4);
+    return $self->{value}->[3];
+  }
+
   sub slice {
     my $self = shift;
     my @range = @_;
