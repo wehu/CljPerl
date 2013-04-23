@@ -206,6 +206,8 @@ package CljPerl::Eval;
         $ast->error("map accessor expects a map or meta as the first arguments")
            if $m->type() ne "map" and $m->type() ne "meta";
         if($ast->size() == 2) {
+          $ast->error("key " . $f->value() . " does not exist")
+            if ! exists $m->value()->{$f->value()};
           return $m->value()->{$f->value()};
         } elsif($ast->size() == 3) {
           $m->value()->{$f->value()} = $self->_eval($ast->third());
