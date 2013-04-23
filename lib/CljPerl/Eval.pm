@@ -93,11 +93,14 @@ package CljPerl::Eval;
     my $str = shift;
     my $reader = CljPerl::Reader->new();
     $reader->read_string($str);
-    $reader->ast()->each(sub {$self->_eval($_[0])});
-    return 1;
+    my $res = undef;
+    $reader->ast()->each(sub {$res = $self->_eval($_[0])});
+    return $res;
   }
 
-  our $builtin_funcs = {def=>1,
+  our $builtin_funcs = {
+                  "eval"=>1,
+                  def=>1,
                   "set!"=>1,
                   fn=>1,
 		  defmacro=>1,
@@ -329,7 +332,12 @@ package CljPerl::Eval;
     my $ast = shift;
     my $f = $ast->first();
     my $fn = $f->value();
-    if($fn eq "def" or $fn eq "set!") {
+    if($fn eq "eval") {
+      $ast->error("eval expects 1 argument1") if $ast->size() != 2;
+      my $s = $ast->second();
+      $ast->error("eval expects 1 string as argument") if $s->type() ne "string";
+      return $self->eval($s->value());
+    } elsif($fn eq "def" or $fn eq "set!") {
       $ast->error($fn . " expects 2 arguments") if $ast->size() != 3;
       my $name = $ast->second()->value();
       my $value = $self->_eval($ast->third());
@@ -531,7 +539,7 @@ package CljPerl::Eval;
         foreach my $r (@rest) {
           push @{$args}, $self->_eval($r)->value();
         };
-        my $res = $perl_func->(@{$args});
+        my $res = &wrap_value($ast, \$perl_func->(@{$args}));
         return $res;
       }
     } elsif($fn eq "println") {
@@ -542,6 +550,19 @@ package CljPerl::Eval;
   
     return $ast;
   }
-  
+ 
+  sub wrap_value {
+    my $ast = shift;
+    my $v = shift;
+    if(ref($v) eq "SCALAR") {
+      return CljPerl::Atom->new("string", ${$v});
+    } elsif(ref($v) eq "HASH") {
+      return CljPerl::Atom->new("map", \%{$v});
+    } elsif(ref($v) eq "ARRAY") {
+      return CljPerl::Atom->new("vector", \@{$v});
+    } else {
+      $ast->error("expect a reference of scalar or hash or array");
+    };
+  } 
 
 1;

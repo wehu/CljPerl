@@ -85,4 +85,6 @@
 
 (.CljPerl print "aaa\n")
 
-(. print "bbb\n")
+(println (. print "bbb\n"))
+
+(println (eval "(+ 1 2)"))
