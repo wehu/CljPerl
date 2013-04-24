@@ -30,6 +30,21 @@ sub print {
   print @_;
 }
 
+sub open {
+  my $file = shift;
+  my $cb = shift;
+  my $fh;
+  open $fh, $file;
+  &{$cb}($fh);
+  close $fh;
+}
+
+sub puts {
+  my $fh = shift;
+  my $str = shift;
+  print $fh $str;
+}
+
 1;
 __END__
 

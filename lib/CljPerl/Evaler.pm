@@ -321,6 +321,14 @@ package CljPerl::Evaler;
 	};
 	$self->pop_scope();
 	return $res;
+      } elsif($ftype eq "perlfunction") {
+        my @rargs = $ast->slice(1 .. $size-1);
+        my @args = ();
+        foreach my $arg (@rargs) {
+          push @args, $self->clj2perl($arg);
+        };
+        my $perl_func = $f->value();
+        return &perl2clj($ast, \&{$perl_func}(@args));
       } elsif($ftype eq "macro") {
         my $scope = $f->{context};
         my $fn = $f->value();
@@ -754,9 +762,9 @@ package CljPerl::Evaler;
         my @rest = $ast->slice(2 .. $size-1);
         my $args = ();
         foreach my $r (@rest) {
-          push @{$args}, $self->_eval($r)->value();
+          push @{$args}, $self->clj2perl($self->_eval($r));
         };
-        my $res = &wrap_value($ast, \$perl_func->(@{$args}));
+        my $res = &perl2clj($ast, \$perl_func->(@{$args}));
         return $res;
       }
     # (println obj)
@@ -772,18 +780,69 @@ package CljPerl::Evaler;
   
     return $ast;
   }
- 
-  sub wrap_value {
+
+  sub clj2perl {
+    my $self = shift;
+    my $ast = shift;
+    my $type = $ast->type();
+    my $value = $ast->value();
+    if($type eq "string" or $type eq "number"
+       or $type eq "quotation" or $type eq "keyword"
+       or $type eq "perlobject") {
+      return $value;
+    } elsif($type eq "list" or $type eq "vector") {
+      my @r = ();
+      foreach my $i (@{$value}) {
+        push @r, $self->cli2perl($i);
+      };
+      return @r;
+    } elsif($type eq "map") {
+      my %r = ();
+      foreach my $k (keys %{$value}) {
+        $r{$k} = $self->cli2perl($value->{$k});
+      };
+      return %r;
+    } elsif($type eq "function") {
+      my $f = sub {
+        my @args = @_;
+        my $cljf = CljPerl::Seq->new("list");
+        $cljf->append($ast);
+        foreach my $arg (@args) {
+          $cljf->append(&perl2clj($ast, $arg));
+        };
+        $self->_eval($cljf);
+      };
+      return $f;
+    } else {
+      $ast->error("unsupported type " . $type . " for clj2perl object conversion");
+    }
+  }
+
+  sub perl2clj {
     my $ast = shift;
     my $v = shift;
+    while(ref($v) eq "REF") {
+      $v = ${$v};
+    }
     if(ref($v) eq "SCALAR") {
       return CljPerl::Atom->new("string", ${$v});
     } elsif(ref($v) eq "HASH") {
-      return CljPerl::Atom->new("map", \%{$v});
+      my %m = ();
+      foreach my $k (keys %{$v}) {
+        $m{$k} = &perl2clj($ast, $v->{$k});
+      };
+      return CljPerl::Atom->new("map", \%m);
     } elsif(ref($v) eq "ARRAY") {
-      return CljPerl::Atom->new("vector", \@{$v});
+      my @a = ();
+      foreach my $i (@{$v}) {
+        $a[$i] = &perl2clj($ast, $v->[$i]);
+      };
+      return CljPerl::Atom->new("vector", \@a);
+    } elsif(ref($v) eq "CODE") {
+      return CljPerl::Atom->new("perlfunction", $v);
     } else {
-      $ast->error("expect a reference of scalar or hash or array");
+      return CljPerl::Atom->new("perlobject", $v);
+      #$ast->error("expect a reference of scalar or hash or array");
     };
   }
 
