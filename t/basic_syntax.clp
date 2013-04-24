@@ -163,17 +163,3 @@
 
 (open "<t.txt" (fn [f]
   (println (<< f))))
-
-(. require "/usr/local/lib/perl/5.12.4/AnyEvent.pm")
-
-(def cv (.AnyEvent condvar))
-
-(def count 0)
-
-(.AnyEvent timer
-  {:after 1
-   :interval 1
-   :cb (fn []
-         (println "a"))})
-
-(.AnyEvent::CondVar::Base recv cv)
