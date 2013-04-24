@@ -14,7 +14,7 @@ package CljPerl::Atom;
     my $self = {class=>"Atom",
 	        type=>$type,
 	        value=>$value,
-                meta=>{},
+                meta=>undef,
 	        pos=>{filename=>"unknown",
 		      line=>0,
 	              col=>0}};

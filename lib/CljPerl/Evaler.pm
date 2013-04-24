@@ -115,6 +115,8 @@ package CljPerl::Evaler;
                   "type"=>1,
                   "meta"=>1,
                   "apply"=>1,
+                  append=>1,
+                  "keys"=>1,
                   "!"=>1,
                   "+"=>1,
                   "-"=>1,
@@ -210,7 +212,7 @@ package CljPerl::Evaler;
       my $fvalue = $f->value();
       if($ftype eq "symbol") {
 	return $self->builtin($f, $ast);
-      } elsif($ftype eq "keyword") {
+      } elsif($ftype eq "keyword" or $ftype eq "string") {
         $ast->error("keyword accessor expects >= 1 arguments") if $size == 1;
         my $m = $self->_eval($ast->second());
         my $mtype = $m->type();
@@ -346,8 +348,9 @@ package CljPerl::Evaler;
       $ast->error($type . " should have even number of items") if ($n%2) != 0;
       for(my $i=0; $i<$n; $i+=2) {
         my $k = $self->_eval($value->[$i]);
-        $ast->error($type . " expect keyword as key")
-          if ($k->type() ne "keyword");
+        $ast->error($type . " expects keyword or string as key")
+          if ($k->type() ne "keyword"
+              and $k->type() ne "string");
         my $v = $self->_eval($value->[$i+1]);
         $mv{$k->value()} = $v;
       };
@@ -598,6 +601,44 @@ package CljPerl::Evaler;
         $ast->error("unexpected type of argument for length");
       };
       return $r;
+    # (append list1 list2)
+    } elsif($fn eq "append") {
+      $ast->error("append expects 2 arguments") if $size != 3;
+      my $v1 = $self->_eval($ast->second());
+      my $v2 = $self->_eval($ast->third());
+      my $v1type = $v1->type();
+      my $v2type = $v2->type();
+      $ast->error("append expects string or list or vector as arguments")
+       if (($v1type ne $v2type)
+           or ($v1type ne "string"
+               and $v1type ne "list"
+               and $v1type ne "vector"
+               and $v1type ne "map"));
+      if($v1type eq "string") {
+        return CljPerl::Atom->new("string", $v1->value() . $v2->value());
+      } elsif($v1type eq "list" or $v1type eq "vector") {
+        my @r = ();
+        push @r, @{$v1->value()};
+        push @r, @{$v2->value()};
+        if($v1type eq "list"){
+          return CljPerl::Seq->new("list", \@r);
+        } else {
+          return CljPerl::Atom->new("vector", \@r);
+        };
+      } else {
+        my %r = (%{$v1->value()}, %{$v2->value()});
+        return CljPerl::Atom->new("map", \%r);
+      };
+    # (keys map)
+    } elsif($fn eq "keys") {
+      $ast->error("keys expects 1 argument") if $size != 2;
+      my $v = $self->_eval($ast->second());
+      $ast->error("keys expects map as arguments") if $v->type() ne "map";
+      my @r = ();
+      foreach my $k (keys %{$v->value()}) {
+        push @r, CljPerl::Atom->new("keyword", $k);
+      };
+      return CljPerl::Seq->new("list", \@r);
     # (type obj)
     } elsif($fn eq "type") {
       $ast->error("type expects 1 argument") if $size != 2;
@@ -620,9 +661,16 @@ package CljPerl::Evaler;
       return $self->_eval($n);
     # (meta obj)
     } elsif($fn eq "meta") {
-      $ast->error("meta expects 1 argument") if $size != 2;
+      $ast->error("meta expects 1 or 2 arguments") if $size < 2 or $size > 3;
       my $v = $self->_eval($ast->second());
-      return $v->meta();
+      if($size == 3){
+        my $vm = $self->_eval($ast->third());
+        $ast->error("meta expects 1 meta data as the second arguments") if $vm->type() ne "meta";
+        $v->meta($vm);
+      }
+      my $m = $v->meta();
+      $ast->error("no meta data in " . CljPerl::Printer::to_string($v)) if !defined $m;
+      return $m;
     # (.namespace function args...)
     } elsif($fn =~ /^\.(\S*)$/) {
       my $ns = $1;

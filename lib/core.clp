@@ -4,19 +4,26 @@
 
 (defmacro defmulti [name dispatch-fn]
   `(def ^{} ~name (fn [dispatch-val & args]
-     (apply ((~dispatch-fn dispatch-val) (meta ~name)) args))))
+     (apply ((~dispatch-fn dispatch-val) (meta ~name)) (cons dispatch-val args)))))
 
 (defmacro defmethod [name dispatch-val args & body]
   `(~dispatch-val (meta ~name)
      (fn ~args ~@body)))
 
-; do not use recursiv function,
+; Do not use recursive function,
 ; since we do not support optimazation of tail call.
-(def reduce (fn [afn init alist]
+(defn reduce [afn init alist]
   (def res init)
   (def i 0)
   (def l (length alist))
   (while (< i l)
     (set! res (afn (i alist) res))
     (set! i (+ i 1)))
-  res))
+  res)
+
+(defn map [afn alist]
+  (reduce (fn [a i]
+    (append i 
+      (list (afn a))))
+    ()
+    alist))

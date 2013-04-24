@@ -112,7 +112,10 @@ package CljPerl::Reader;
     do {
       $c = $self->peekc();
       if(defined $c){
-        if($c =~ /\s/) {
+        if($c eq ";"){
+          $self->consume(1);
+          $self->comment();
+        } elsif($c =~ /\s/) {
           $self->consume(1);
         } else {
           $c = undef;
@@ -181,8 +184,8 @@ package CljPerl::Reader;
 	return $self->seq("vector", "[", "]");
       } elsif($c eq '{') {
         return $self->seq("map", "{", "}");
-      } elsif($c eq '#') {
-        return $self->dispatch();
+      #} elsif($c eq '#') {
+      #  return $self->dispatch();
       } elsif($c eq '^') {
         $self->consume(1);
         $self->error("meta should be a map") if $self->peekc() ne "{";
@@ -209,11 +212,11 @@ package CljPerl::Reader;
         my $dq = $self->symbol();
 	$dq->type("dequotation");
 	return $dq;
-      } elsif($c eq "@") {
-        $self->consume(1);
-        my $dr = $self->symbol();
-	$dr->type("deref");
-	return $dr;
+      #} elsif($c eq "@") {
+      #  $self->consume(1);
+      #  my $dr = $self->symbol();
+      #$dr->type("deref");
+      #return $dr;
       } elsif($c eq ";") {
         $self->consume(1);
         $self->comment();

@@ -42,6 +42,7 @@
 
 (if true
   (println 'true)
+; ljfdljd
   (println 'false)) 
 
 (if false
@@ -97,13 +98,13 @@
 
 (require "../lib/core.clp")
 
-(defmulti mf (fn [a] a))
+(defmulti mf type)
 (println (meta mf))
-(defmethod mf :a [a] (println a))
-(defmethod mf :b [a] (println a))
+(defmethod mf "string" [a] (println "string"))
+(defmethod mf "keyword" [a] (println "keyword"))
 (println (meta mf))
-(mf :a :a)
-(mf :b :a)
+(mf "a")
+(mf :b)
 
 (apply println '(:a))
 
@@ -123,3 +124,18 @@
 (set! i 0)
 ((fn [a] (set! a i)) 1)
 (println i)
+
+(meta i ^{:a 1})
+(println (meta i))
+
+(println (append "abc" "def"))
+(println (append '(a b c) '(def)))
+(println (append [:a :b :c] [:a :b :c]))
+(println (append {:a :b} {:c :d}))
+
+(println (keys {"a" :b :c :d}))
+(println ("a" {"a" :b}))
+
+(println (map (fn [i]
+   (+ i 1))
+  `(1 2 3)))

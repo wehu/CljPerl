@@ -10,11 +10,13 @@ package CljPerl::Seq;
     my $class = shift;
     my $type  = shift;
     $type = "list" if !defined $type;
+    my $value = shift;
     my @seq = ();
+    $value = \@seq if !defined $value;
     my $self = {class=>"Seq",
 	        type=>$type,
-                value=>\@seq,
-                meta=>{},
+                value=>$value,
+                meta=>undef,
                 pos=>{filename=>"unknown",
 		      line=>0,
 	              col=>0}};

@@ -20,12 +20,21 @@ make use of the great resource from CPAN.
 	
 	(foo "hello world!") ;comment here
 	
-	(foo :abc)
+	(foo (+ 1 2))
 	
 	(.CljPerl print "Hi\n")
 	
 	(. print "Guy\n")
 
+	(defmulti mf type)
+	(defmethod mf "string" [a] (println "string"))
+	(defmethod mf "keyword" [a] (println "keyword"))
+	(mf "test")
+	(mf :test)
+
 	------------------
 
 	> bin/cljp t.clp
+
+### TODO
+
