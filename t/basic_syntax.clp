@@ -157,3 +157,9 @@
 (. open ">t.txt" (fn [f]
   (println "bbbb")
   (. puts f "aaa")))
+
+(open ">t.txt" (fn [f]
+  (>> f "aaa")))
+
+(open "<t.txt" (fn [f]
+  (println (<< f))))

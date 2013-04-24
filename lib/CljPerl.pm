@@ -45,6 +45,11 @@ sub puts {
   print $fh $str;
 }
 
+sub readline {
+  my $fh = shift;
+  return <$fh>;
+}
+
 1;
 __END__
 
