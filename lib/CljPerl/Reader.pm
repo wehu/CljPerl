@@ -133,7 +133,7 @@ package CljPerl::Reader;
     $mode = "string" if !defined $mode;
     my $fh = undef;
     if($mode eq "string"){
-      open $fh, "<:encoding(utf8)", \$file_or_str or die "cannot read string $file_or_str";
+      open $fh, "<", \$file_or_str or die "cannot read string $file_or_str";
     } else {
       open $fh, "<:encoding(utf8)", $file_or_str or die "cannot open file $file_or_str";
     };

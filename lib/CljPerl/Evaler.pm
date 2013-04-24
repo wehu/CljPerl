@@ -793,13 +793,13 @@ package CljPerl::Evaler;
     } elsif($type eq "list" or $type eq "vector") {
       my @r = ();
       foreach my $i (@{$value}) {
-        push @r, $self->cli2perl($i);
+        push @r, $self->clj2perl($i);
       };
       return @r;
     } elsif($type eq "map") {
       my %r = ();
       foreach my $k (keys %{$value}) {
-        $r{$k} = $self->cli2perl($value->{$k});
+        $r{$k} = $self->clj2perl($value->{$k});
       };
       return %r;
     } elsif($type eq "function") {
@@ -835,7 +835,7 @@ package CljPerl::Evaler;
     } elsif(ref($v) eq "ARRAY") {
       my @a = ();
       foreach my $i (@{$v}) {
-        $a[$i] = &perl2clj($ast, $v->[$i]);
+        push @a, &perl2clj($ast, $i);
       };
       return CljPerl::Atom->new("vector", \@a);
     } elsif(ref($v) eq "CODE") {

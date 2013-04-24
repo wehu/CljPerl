@@ -163,3 +163,5 @@
 
 (open "<t.txt" (fn [f]
   (println (<< f))))
+
+(. require "AnyEvent")
