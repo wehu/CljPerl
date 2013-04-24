@@ -1,3 +1,9 @@
+(defmacro ns [name & body]
+  `(begin
+     (namespace-begin ~name)
+     ~@body
+     (namespace-end)))
+
 (defmacro defn [name args & body]
   `(def ~name
      (fn ~args ~@body)))

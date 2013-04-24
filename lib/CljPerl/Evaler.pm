@@ -8,9 +8,12 @@ package CljPerl::Evaler;
   use File::Spec;
   use File::Basename;
 
+  our $namespace_key = "0namespace0";
+
   sub new {
     my $class = shift;
-    my @scopes = ({});
+    my @default_namespace = ();
+    my @scopes = ({$namespace_key=>\@default_namespace});
     my @file_stack = ();
     my $self = {class=>$class,
                 scopes=>\@scopes,
@@ -31,6 +34,8 @@ package CljPerl::Evaler;
     my $self = shift;
     my $context = shift;
     my %c = %{$context};
+    my @ns = @{$c{$namespace_key}};
+    $c{$namespace_key} = \@ns;
     unshift @{$self->scopes()}, \%c;
   }
 
@@ -45,11 +50,33 @@ package CljPerl::Evaler;
     return $scope;
   }
 
+  sub push_namespace {
+    my $self = shift;
+    my $namespace = shift;
+    my $scope = $self->current_scope();
+    unshift @{$scope->{$namespace_key}}, $namespace;
+  }
+
+  sub pop_namespace {
+    my $self = shift;
+    my $scope = $self->current_scope();
+    shift @{$scope->{$namespace_key}};
+  }
+
+  sub current_namespace {
+    my $self = shift;
+    my $scope = $self->current_scope();
+    my $namespace = @{$scope->{$namespace_key}}[0];
+    return "" if(!defined $namespace);
+    return $namespace;
+  }
+
   sub new_var {
     my $self = shift;
     my $name = shift;
     my $value = shift;
     my $scope = $self->current_scope();
+    $name = $self->current_namespace() . "#" . $name;
     $scope->{$name} = CljPerl::Var->new($name, $value);
   }
 
@@ -57,9 +84,13 @@ package CljPerl::Evaler;
     my $self = shift;
     my $name = shift;
     my $scope = $self->current_scope();
-    if(exists $scope->{$name}){
+    if(exists $scope->{$name}) {
       return $scope->{$name};
-    }
+    } elsif(exists $scope->{$self->current_namespace() . "#" . $name}){
+      return $scope->{$self->current_namespace() . "#" . $name};
+    } elsif(exists $scope->{"#" . $name}) {
+      return $scope->{"#" . $name};
+    };
     return undef;
   }
 
@@ -111,12 +142,15 @@ package CljPerl::Evaler;
                   cons=>1,
                   "if"=>1,
                   "while"=>1,
+                  "begin"=>1,
                   "length"=>1,
                   "type"=>1,
                   "meta"=>1,
                   "apply"=>1,
                   append=>1,
                   "keys"=>1,
+                  "namespace-begin"=>1,
+                  "namespace-end"=>1,
                   "!"=>1,
                   "+"=>1,
                   "-"=>1,
@@ -134,7 +168,8 @@ package CljPerl::Evaler;
                   "ne"=>1,
                   "equal"=>1,
                   "require"=>1,
-	          println=>1};
+	          println=>1, 
+                  "trace-vars"=>1};
 
   our $empty_list = CljPerl::Seq->new("list");
   our $true = CljPerl::Atom->new("bool", "true");
@@ -424,6 +459,8 @@ package CljPerl::Evaler;
       }
       my $nast = CljPerl::Atom->new("function", $ast);
       my %c = %{$self->current_scope()};
+      my @ns = @{$c{$namespace_key}};
+      $c{$namespace_key} = \@ns;
       $nast->{context} = \%c;
       return $nast;
     # (defmacro name [args ...] body)
@@ -443,6 +480,8 @@ package CljPerl::Evaler;
       }
       my $nast = CljPerl::Atom->new("macro", $ast);
       my %c = %{$self->current_scope()};
+      my @ns = @{$c{$namespace_key}};
+      $c{$namespace_key} = \@ns;
       $nast->{context} = \%c;
       $self->new_var($name, $nast);
       return $nast;
@@ -514,6 +553,15 @@ package CljPerl::Evaler;
           $res = $self->_eval($i);
         }
         $cond = $self->_eval($ast->second());
+      }
+      return $res;
+    # (begin body)
+    } elsif($fn eq "begin") {
+      $ast->error("being expects >= 1 arguments") if $size < 2;
+      my $res = $nil;
+      my @body = $ast->slice(1 .. $size-1);
+      foreach my $i (@body) {
+        $res = $self->_eval($i);
       }
       return $res;
     # + - & / % operations
@@ -639,6 +687,21 @@ package CljPerl::Evaler;
         push @r, CljPerl::Atom->new("keyword", $k);
       };
       return CljPerl::Seq->new("list", \@r);
+    # (namespace-begin "ns")
+    } elsif($fn eq "namespace-begin") {
+      $ast->error("namespace-begin expects 1 argument") if $size != 2;
+      my $v = $self->_eval($ast->second());
+      $ast->error("namespace-begin expects string as argument")
+        if $v->type() ne "string"
+           and $v->type() ne "symbol"
+           and $v->type() ne "keyword";
+      $self->push_namespace($v->value());
+      return $v;
+    # (namespace-end)
+    } elsif($fn eq "namespace-end") {
+      $ast->error("namespace-end expects 0 argument") if $size != 1;
+      $self->pop_namespace();
+      return $nil;
     # (type obj)
     } elsif($fn eq "type") {
       $ast->error("type expects 1 argument") if $size != 2;
@@ -701,6 +764,10 @@ package CljPerl::Evaler;
       $ast->error("println expects 1 argument") if $size != 2;
       print CljPerl::Printer::to_string($self->_eval($ast->second())) . "\n";
       return $nil;
+    } elsif($fn eq "trace-vars") {
+      $ast->error("trace-vars expects 0 argument") if $size != 1;
+      $self->trace_vars();
+      return $nil;
     };
   
     return $ast;
@@ -717,6 +784,13 @@ package CljPerl::Evaler;
       return CljPerl::Atom->new("vector", \@{$v});
     } else {
       $ast->error("expect a reference of scalar or hash or array");
+    };
+  }
+
+  sub trace_vars {
+    my $self = shift;
+    foreach my $vn (keys %{$self->current_scope()}) {
+      print "$vn\n" # . CljPerl::Printer::to_string(${$self->current_scope()}{$vn}->value()) . "\n";
     };
   } 
 

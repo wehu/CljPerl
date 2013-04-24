@@ -139,3 +139,19 @@
 (println (map (fn [i]
    (+ i 1))
   `(1 2 3)))
+
+(namespace-begin "aaa")
+(def aaa 0)
+(println aaa)
+(namespace-end)
+(println aaa#aaa)
+
+(ns "foo"
+  (def bar0 'bar0)
+  (defn bar []
+    bar0))
+(ns "bar"
+  (def bar0 'bar1)
+  (println (foo#bar)))
+
+
