@@ -803,13 +803,13 @@ package CljPerl::Evaler;
       foreach my $i (@{$value}) {
         push @r, $self->clj2perl($i);
       };
-      return @r;
+      return \@r;
     } elsif($type eq "map") {
       my %r = ();
       foreach my $k (keys %{$value}) {
         $r{$k} = $self->clj2perl($value->{$k});
       };
-      return %r;
+      return \%r;
     } elsif($type eq "function") {
       my $f = sub {
         my @args = @_;
@@ -818,7 +818,7 @@ package CljPerl::Evaler;
         foreach my $arg (@args) {
           $cljf->append(&perl2clj($ast, $arg));
         };
-        $self->_eval($cljf);
+        return $self->clj2perl($self->_eval($cljf));
       };
       return $f;
     } else {
