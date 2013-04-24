@@ -803,13 +803,13 @@ package CljPerl::Evaler;
       foreach my $i (@{$value}) {
         push @r, $self->clj2perl($i);
       };
-      return \@r;
+      return @r;
     } elsif($type eq "map") {
       my %r = ();
       foreach my $k (keys %{$value}) {
         $r{$k} = $self->clj2perl($value->{$k});
       };
-      return \%r;
+      return %r;
     } elsif($type eq "function") {
       my $f = sub {
         my @args = @_;
@@ -834,18 +834,18 @@ package CljPerl::Evaler;
     }
     if(ref($v) eq "SCALAR") {
       return CljPerl::Atom->new("string", ${$v});
-    } elsif(ref($v) eq "HASH") {
-      my %m = ();
-      foreach my $k (keys %{$v}) {
-        $m{$k} = &perl2clj($ast, $v->{$k});
-      };
-      return CljPerl::Atom->new("map", \%m);
-    } elsif(ref($v) eq "ARRAY") {
-      my @a = ();
-      foreach my $i (@{$v}) {
-        push @a, &perl2clj($ast, $i);
-      };
-      return CljPerl::Atom->new("vector", \@a);
+    #} elsif(ref($v) eq "HASH") {
+    #  my %m = ();
+    #  foreach my $k (keys %{$v}) {
+    #    $m{$k} = &perl2clj($ast, $v->{$k});
+    #  };
+    #  return CljPerl::Atom->new("map", \%m);
+    #} elsif(ref($v) eq "ARRAY") {
+    #  my @a = ();
+    #  foreach my $i (@{$v}) {
+    #    push @a, &perl2clj($ast, $i);
+    #  };
+    #  return CljPerl::Atom->new("vector", \@a);
     } elsif(ref($v) eq "CODE") {
       return CljPerl::Atom->new("perlfunction", $v);
     } else {

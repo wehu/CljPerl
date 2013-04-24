@@ -7,6 +7,7 @@ use warnings;
 require Exporter;
 
 use CljPerl::Evaler;
+#use AnyEvent;
 
 our @ISA = qw(Exporter);
 
@@ -49,6 +50,11 @@ sub readline {
   my $fh = shift;
   return <$fh>;
 }
+
+#sub timer {
+#  my %args = @_;
+#  return AnyEvent->timer(%args);
+#}
 
 1;
 __END__
