@@ -760,11 +760,11 @@ package CljPerl::Evaler;
         $ns = "CljPerl" if ! defined $ns or $ns eq "";
         $perl_func = $ns . "::" . $perl_func;
         my @rest = $ast->slice(2 .. $size-1);
-        my $args = ();
+        my @args = ();
         foreach my $r (@rest) {
-          push @{$args}, $self->clj2perl($self->_eval($r));
+          push @args, $self->clj2perl($self->_eval($r));
         };
-        my $res = &perl2clj($ast, \$perl_func->(@{$args}));
+        my $res = &perl2clj($ast, \$perl_func->(@args));
         return $res;
       }
     # (println obj)
@@ -790,6 +790,14 @@ package CljPerl::Evaler;
        or $type eq "quotation" or $type eq "keyword"
        or $type eq "perlobject") {
       return $value;
+    } elsif($type eq "bool") {
+      if($value eq "true") {
+        return 1;
+      } else {
+        return 0;
+      }
+    } elsif($type eq "nil") {
+      return undef;
     } elsif($type eq "list" or $type eq "vector") {
       my @r = ();
       foreach my $i (@{$value}) {
