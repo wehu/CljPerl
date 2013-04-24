@@ -48,8 +48,8 @@
   (println 'true)
   (println 'false))
 
-(set! i 0)
-(set! cond true)
+(def i 0)
+(def cond true)
 (println i)
 (println (+ i 1))
 (while cond
@@ -72,7 +72,7 @@
 (println (equal 'a 'a))
 
 
-(set! m {:abc 100})
+(def m {:abc 100})
 (println (:abc m))
 (:abc m 101)
 (println (:abc m))
@@ -99,7 +99,27 @@
 
 (defmulti mf (fn [a] a))
 (println (meta mf))
-(defmethod mf :a [] (println :a))
+(defmethod mf :a [a] (println a))
+(defmethod mf :b [a] (println a))
 (println (meta mf))
-(mf :a)
+(mf :a :a)
+(mf :b :a)
 
+(apply println '(:a))
+
+(defn bar [afn arg]
+  (afn arg))
+
+(bar println :b)
+
+(def bar println)
+(bar :bar)
+
+(println (reduce (fn [a i]
+  (cons (+ a 1) i))
+  '()
+  '(1 2 3)))
+
+(set! i 0)
+((fn [a] (set! a i)) 1)
+(println i)
