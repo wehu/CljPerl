@@ -766,6 +766,7 @@ package CljPerl::Evaler;
           $ast->error(". require expects a string");
         };
         my $mn = $m->value();
+        $mn =~ s/::/\//g;
         foreach my $ext ("", ".pm") {
           if(-f $mn . $ext) {
             require $mn . $ext;
