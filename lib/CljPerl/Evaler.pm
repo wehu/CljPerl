@@ -426,6 +426,7 @@ package CljPerl::Evaler;
       if($size == 3){
         $ast->error($fn . " expects a symbol as the first argument") if $ast->second()->type() ne "symbol";
         my $name = $ast->second()->value();
+        $ast->error($name . " is a reserved word") if exists $builtin_funcs->{$name} or $name =~ /^(\.|->)\S+$/; 
         $self->new_var($name);
         my $value = $self->_eval($ast->third());
         $self->var($name)->value($value);
@@ -435,6 +436,7 @@ package CljPerl::Evaler;
         $ast->error($fn . " expects a meta as the first argument") if $meta->type() ne "meta";
         $ast->error($fn . " expects a symbol as the first argument") if $ast->third()->type() ne "symbol";
         my $name = $ast->third()->value();
+        $ast->error($name . " is a reserved word") if exists $builtin_funcs->{$name} or $name =~ /^(\.|->)\S+$/;
         $self->new_var($name);
         my $value = $self->_eval($ast->fourth());
         $value->meta($meta);
