@@ -330,7 +330,7 @@ package CljPerl::Evaler;
           push @args, $self->clj2perl($arg);
         };
         my $perl_func = $f->value();
-        return &wrap_perlobj($ast, \&{$perl_func}(@args));
+        return &wrap_perlobj(\&{$perl_func}(@args));
       } elsif($ftype eq "macro") {
         my $scope = $f->{context};
         my $fn = $f->value();
@@ -789,14 +789,14 @@ package CljPerl::Evaler;
         foreach my $r (@rest) {
           push @args, $self->clj2perl($self->_eval($r));
         };
-        return &wrap_perlobj($ast, \$perl_func->(@args));
+        return &wrap_perlobj(\$perl_func->(@args));
       }
     # (perl->clj o)
     } elsif($fn eq "perl->clj") {
       $ast->error("perl->clj expects 1 argument") if $size != 2;
       my $o = $self->_eval($ast->second());
       $ast->error("perl->clj expects perlobject as argument") if $o->type() ne "perlobject";
-      return &perl2clj($o);
+      return &perl2clj($o->value());
     # (println obj)
     } elsif($fn eq "println") {
       $ast->error("println expects 1 argument") if $size != 2;
@@ -846,7 +846,7 @@ package CljPerl::Evaler;
         my $cljf = CljPerl::Seq->new("list");
         $cljf->append($ast);
         foreach my $arg (@args) {
-          $cljf->append(&wrap_perlobj($ast, $arg));
+          $cljf->append(&perl2clj($arg));
         };
         return $self->clj2perl($self->_eval($cljf));
       };
@@ -857,7 +857,6 @@ package CljPerl::Evaler;
   }
 
   sub wrap_perlobj {
-    my $ast = shift;
     my $v = shift;
     while(ref($v) eq "REF") {
       $v = ${$v};
@@ -866,26 +865,26 @@ package CljPerl::Evaler;
   }
 
   sub perl2clj {
-    my $ast = shift;
-    my $v = $ast->value();
+    my $v = shift; #$ast->value();
     if(ref($v) eq "SCALAR") {
       return CljPerl::Atom->new("string", ${$v});
     } elsif(ref($v) eq "HASH") {
       my %m = ();
       foreach my $k (keys %{$v}) {
-        $m{$k} = &convert_perlobj($ast, $v->{$k});
+        $m{$k} = &perl2clj($v->{$k});
       };
       return CljPerl::Atom->new("map", \%m);
     } elsif(ref($v) eq "ARRAY") {
       my @a = ();
       foreach my $i (@{$v}) {
-        push @a, &conver_perlobj($ast, $i);
+        push @a, &perl2clj($i);
       };
       return CljPerl::Atom->new("vector", \@a);
     } elsif(ref($v) eq "CODE") {
       return CljPerl::Atom->new("perlfunction", $v);
     } else {
-      $ast->error("expect a reference of scalar or hash or array");
+      return CljPerl::Atom->new("perlobject", $v);
+      #$ast->error("expect a reference of scalar or hash or array");
     };
   }
 
