@@ -1,14 +1,14 @@
-### CljPerl
+# CljPerl
 
-CljPerl is a lisp implemented by Perl. It borrows the idea from Clojure,
+CljPerl is a Lisp implemented by Perl. It borrows the idea from Clojure,
 which makes a seamless connection with Java packages.
 Like Java, Perl has huge number of CPAN packages.
 They are amazing resources. We should make use of them as possible.
-However, programming in lisp is more insteresting.
-CljPerl is a bridge between lisp and perl. We can program in lisp and
-make use of the great resource from CPAN.
+However, programming in Lisp is more insteresting.
+CljPerl is a bridge between Lisp and Perl. We can program in Lisp and
+make use of the great resources from CPAN.
 
-### Example
+## Example
 
 	;; file t.clp
 	(defmacro defn [name args & body]
@@ -36,7 +36,7 @@ make use of the great resource from CPAN.
 
 	> bin/cljp t.clp
 
-### Lisp <-> Perl
+## Lisp <-> Perl
 
 CljPerl is hosted on Perl. Any object of CljPerl can be passed into Perl and vice versa including code.
 
@@ -103,4 +103,7 @@ An advanced example which creates a timer with AnyEvent.
 	           (set! t nil)))}))
 	
 	(.AnyEvent::CondVar::Base recv cv)
-	
+
+## Documents
+
+See APIs.md
