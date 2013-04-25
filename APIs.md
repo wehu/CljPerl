@@ -67,54 +67,54 @@
 
 ##### list :
 
-	(list 'a 'b 'c) => '(a b c)
+	(list 'a 'b 'c) ;=> '(a b c)
 
 ##### car :
 
-	(car '(a b c))  => 'a
+	(car '(a b c))  ;=> 'a
 
 ##### cdr :
 
-	(cdr '(a b c))  => '(b c)
+	(cdr '(a b c))  ;=> '(b c)
 
 ##### cons :
 
-	(cons 'a '(b c)) => '(a b c)
+	(cons 'a '(b c)) ;=> '(a b c)
 
 ##### key accessor :
 
-	(:a {:a 'a :b 'a}) => 'a
+	(:a {:a 'a :b 'a}) ;=> 'a
 
 ##### keys :
 
-	(keys {:a 'a :b 'b}) => (:a :b)
+	(keys {:a 'a :b 'b}) ;=> (:a :b)
 
 ##### index accessor :
 
-	(1 ['a 'b 'c]) => 'b
+	(1 ['a 'b 'c]) ;=> 'b
 
 ##### length :
 
-	(length '(a b c)) => 3
-	(length ['a 'b 'c]) => 3
-	(length "abc") => 3
+	(length '(a b c)) ;=> 3
+	(length ['a 'b 'c]) ;=> 3
+	(length "abc") ;=> 3
 
 ##### append :
 
-	(append '(a b) '(c d)) => '(a b c d)
-	(append ['a 'b] ['c 'd]) => ['a 'b 'c 'd]
-	(append "ab" "cd") => "abcd"
+	(append '(a b) '(c d)) ;=> '(a b c d)
+	(append ['a 'b] ['c 'd]) ;=> ['a 'b 'c 'd]
+	(append "ab" "cd") ;=> "abcd"
 
 ##### type :
 
-	(type "abc") => "string"
-	(type :abc)  => "keyword"
-	(type {})    => "map"
+	(type "abc") ;=> "string"
+	(type :abc)  ;=> "keyword"
+	(type {})    ;=> "map"
 
 ##### meta :
 
 	(meta foo ^{:m 'b})
-	(meta foo) => {:m 'b}
+	(meta foo) ;=> {:m 'b}
 
 ##### fn :
 
@@ -123,7 +123,7 @@
 
 ##### apply :
 
-	(apply list '(a b c)) => '(a b c)
+	(apply list '(a b c)) ;=> '(a b c)
 
 ##### eval :
 
@@ -172,7 +172,7 @@
 
 ##### ! :
 
-	(! true) => false
+	(! true) ;=> false
 
 ##### + - * / % == != >= <= > < : only for number.
 
