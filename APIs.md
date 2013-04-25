@@ -1,231 +1,235 @@
 ## Reader
 
-Reader forms
+#### Reader forms
 
- * Symbols :
+##### Symbols :
 
 	foo, foo#bar
 
- * Literals
-   * Strings :
+##### Literals
+ 
+###### Strings :
 
 	"foo", "\"foo\tbar\n\""
 
-   * Numbers :
+###### Numbers :
 
 	1, -2, 2.5
 
-   * Booleans :
+###### Booleans :
 
 	true, false
 
-   * Keywords :
+###### Keywords :
 
 	:foo
 
- * Lists :
+##### Lists :
 
 	(foo bar)
 
- * Vectors :
+##### Vectors :
 
 	[foo bar]
 
- * Maps :
+##### Maps :
 
 	{:key1 value1 :key2 value2 "key3" value3}
 
 
-Macro charaters
+#### Macro charaters
 
- * Quote (') :
+##### Quote (') :
 
 	'(foo bar)
 
- * Comment (;) :
+##### Comment (;) :
 
 	; comment
 
- * Metadata (^) :
+##### Metadata (^) :
 
 	^{:key value}
 
- * Syntax-quote (`) :
+##### Syntax-quote (`) :
 
 	`(foo bar)
 
- * Unquote (~) :
+##### Unquote (~) :
 
 	`(foo ~bar)
 
- * Unquote-slicing (~@) :
+##### Unquote-slicing (~@) :
 
 	`(foo ~@bar)
 
 ## Builtin Functions
 
- * list :
+##### list :
 
 	(list 'a 'b 'c) => '(a b c)
 
- * car :
+##### car :
 
 	(car '(a b c))  => 'a
 
- * cdr :
+##### cdr :
 
 	(cdr '(a b c))  => '(b c)
 
- * cons :
+##### cons :
 
 	(cons 'a '(b c)) => '(a b c)
 
- * key accessor :
+##### key accessor :
 
 	(:a {:a 'a :b 'a}) => 'a
 
- * keys :
+##### keys :
 
 	(keys {:a 'a :b 'b}) => (:a :b)
 
- * index accessor :
+##### index accessor :
 
 	(1 ['a 'b 'c]) => 'b
 
- * length :
+##### length :
 
 	(length '(a b c)) => 3
 	(length ['a 'b 'c]) => 3
 	(length "abc") => 3
 
- * append :
+##### append :
 
 	(append '(a b) '(c d)) => '(a b c d)
 	(append ['a 'b] ['c 'd]) => ['a 'b 'c 'd]
 	(append "ab" "cd") => "abcd"
 
- * type :
+##### type :
 
 	(type "abc") => "string"
 	(type :abc)  => "keyword"
 	(type {})    => "map"
 
- * meta :
+##### meta :
 
 	(meta foo ^{:m 'b})
 	(meta foo) => {:m 'b}
 
- * fn :
+##### fn :
 
 	(fn [arg & args]
 	  (println 'a))
 
- * apply :
+##### apply :
 
 	(apply list '(a b c)) => '(a b c)
 
- * eval :
+##### eval :
 
 	(eval "(+ 1 2)")
 
- * require :
+##### require :
 
 	(require "core")
 
- * def :
+##### def :
 
 	(def foo "bar")
 	(def ^{:k v} foo "bar")
 
- * set! :
+##### set! :
 
 	(set! foo "bar") 
 
- * defmacro :
+##### defmacro :
 
-	(defmacro foo [arg & args]
-	  `(println ~arg) `(list ~@args))
+	(defmacro foo [arg & args]	
+	  `(println ~arg)
+	  `(list ~@args))
 
- * if :
+##### if :
 
 	(if (> 1 0)
 	  (println true)
 	  (println false))
+	  
 	(if true
 	  (println true))
 
- * while :
+##### while :
 
 	(while true
 	  (println true))
 
- * begin :
+##### begin :
 
 	(begin
 	  (println 'foo)
 	  (println 'bar))
 
- * perl->clj :
+##### perl->clj :
 
- * ! :
+##### ! :
 
 	(! true) => false
 
- * + - * / % == != >= <= > < : only for number.
+##### + - * / % == != >= <= > < : only for number.
 
- * eq ne : only for string.
+##### eq ne : only for string.
 
- * equal : for all objects.
+##### equal : for all objects.
 
- * . : (.[perl namespace] method args ...)
+##### . : (.[perl namespace] method args ...)
 
 	(.CljPerl print "foo")
 
- * -> : (->[perl namespace] method args ...)
+##### -> : (->[perl namespace] method args ...)
    Like '.', but this will pass perl namespace as first argument to perl method.
 
- * println
+##### println
 
 	(println {:a 'a})
 
- * trace-vars : Trace the variables in current frame.
+##### trace-vars : Trace the variables in current frame.
 
 	(trace-vars)
 
 ## Core Functions
 
- * use-lib : append path into Perl and CljPerl files' searching paths.
+##### use-lib : append path into Perl and CljPerl files' searching paths.
 
 	(use-lib "path")
 
- * ns : CljPerl namespace.
+##### ns : CljPerl namespace.
 
-	(ns "foo" (println "bar"))
+	(ns "foo"
+	  (println "bar"))
 
- * defn :
+##### defn :
 
-	(defn foo [arg & args]
-	  (println arg))
+  (defn foo [arg & args]
+    (println arg))
 
- * defmulti :
+##### defmulti :
 
- * defmethod :
+##### defmethod :
 
- * reduce :
+##### reduce :
 
- * map :
+##### map :
 
- * open : open a file with a callback.
+##### open : open a file with a callback.
 
 	(open ">file"
 	  (fn [fh]
 	    (>> fn "foo")))
 
- * << : read a line from a file handler.
+##### << : read a line from a file handler.
 
 	(<< fh)
 
- * >> : write a string into a file handler.
+##### >> : write a string into a file handler.
 
 	(>> fh "foo")
 
