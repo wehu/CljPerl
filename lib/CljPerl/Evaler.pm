@@ -104,12 +104,30 @@ package CljPerl::Evaler;
     }
   }
 
+  our @search_paths = ();
+
+  sub search_file {
+    my $self = shift;
+    my $file = shift;
+    foreach my $ext ("", ".clp") {
+      if(-f dirname($self->current_file()) . "/$file$ext") {
+        return dirname($self->current_file()) . "/$file$ext";
+      } elsif(-f $file . $ext) {
+        return $file . $ext;
+      };
+      foreach my $p (@INC) {
+        if(-f "$p/$file$ext") {
+          return "$p/$file$ext";
+        };
+      }
+    }
+    CljPerl::Printer::error("cannot find " . $file); 
+  }
+
   sub load {
     my $self = shift;
     my $file = shift;
-    if($file =~ /^[^\/]/){
-      $file = dirname($self->current_file()) . "/$file";
-    };
+    $file = $self->search_file($file);
     return 1 if exists $self->{loaded_files}->{$file};
     $self->{loaded_files}->{$file} = 1;
     push @{$self->{file_stack}}, $file;

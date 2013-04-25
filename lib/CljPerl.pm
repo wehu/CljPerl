@@ -3,6 +3,8 @@ package CljPerl;
 use 5.008008;
 use strict;
 use warnings;
+use File::Basename;
+use File::Spec;
 
 require Exporter;
 
@@ -54,6 +56,9 @@ sub use_lib {
   my $path = shift;
   unshift @INC, $path;
 }
+
+my $lib_path = File::Spec->rel2abs(dirname(__FILE__));
+use_lib($lib_path);
 
 1;
 __END__

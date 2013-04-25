@@ -10,8 +10,7 @@ use CljPerl;
 
 my $cljp = CljPerl::Evaler->new();
 
-my $lib_path = File::Spec->rel2abs(dirname(__FILE__) . "/../lib");
-$cljp->load("$lib_path/core.clp");
+$cljp->load("core");
 foreach my $f (@ARGV) {
   $cljp->load($f);
 }

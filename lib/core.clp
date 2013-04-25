@@ -44,3 +44,7 @@
 (defn << [fh]
   (. readline fh))
 
+(defn use-lib [path]
+  (. use_lib path))
+
+
