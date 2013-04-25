@@ -104,13 +104,13 @@ package CljPerl::Evaler;
     }
   }
 
-  our @search_paths = ();
-
   sub search_file {
     my $self = shift;
     my $file = shift;
     foreach my $ext ("", ".clp") {
-      if(-f dirname($self->current_file()) . "/$file$ext") {
+      if(-f "$file$ext") {
+        return "$file$ext";
+      } elsif(-f dirname($self->current_file()) . "/$file$ext") {
         return dirname($self->current_file()) . "/$file$ext";
       } elsif(-f $file . $ext) {
         return $file . $ext;
