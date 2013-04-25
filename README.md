@@ -42,7 +42,7 @@ CljPerl is hosted on Perl. Any object of CljPerl can be passed into Perl and vic
 
 An example of using Perl's IO functions.
 
-###### Perl functions in CljPerl.pm
+####### Perl functions in CljPerl.pm
 
 	package CljPerl;
 	
@@ -77,14 +77,15 @@ An example of using Perl's IO functions.
 	(defn << [fh]
 	  (. readline fh))
 
-####### test
+####### Test
+
 	(open ">t.txt" (fn [f]
 	  (>> f "aaa")))
 	
 	(open "<t.txt" (fn [f]
 	  (println (perl->clj (<< f)))))
 
-An advanced example to work with AnyEvent which creates a timer.
+An advanced example which creates a timer with AnyEvent.
 
 	(. require AnyEvent)
 
