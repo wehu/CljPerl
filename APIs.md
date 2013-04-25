@@ -208,8 +208,8 @@
 
 ##### defn :
 
-  (defn foo [arg & args]
-    (println arg))
+	(defn foo [arg & args]
+	  (println arg))
 
 ##### defmulti :
 
