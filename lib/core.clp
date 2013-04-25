@@ -43,3 +43,4 @@
 
 (defn << [fh]
   (. readline fh))
+

@@ -162,13 +162,15 @@
   (>> f "aaa")))
 
 (open "<t.txt" (fn [f]
-  (println (<< f))))
+  (println (perl->clj (<< f)))))
 
-;(def cv (.AnyEvent condvar))
+;(. require AnyEvent)
+;
+;(def cv (->AnyEvent condvar))
 ;
 ;(def count 0)
 ;
-;(def t (. timer
+;(def t (->AnyEvent timer
 ;  {:after 1
 ;   :interval 1
 ;   :cb (fn [ & args]
