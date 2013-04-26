@@ -3,6 +3,8 @@ package CljPerl::Printer;
   use strict;
   use warnings;
 
+  our $VERSION = '0.01';
+
   sub to_string {
     my $obj = shift;
     my $class = $obj->class();

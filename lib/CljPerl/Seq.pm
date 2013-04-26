@@ -6,6 +6,8 @@ package CljPerl::Seq;
   use CljPerl::Logger;
   use CljPerl::Printer;
 
+  our $VERSION = '0.01';
+
   sub new {
     my $class = shift;
     my $type  = shift;

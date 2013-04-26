@@ -6,6 +6,8 @@ package CljPerl::Atom;
   use CljPerl::Printer;
   use CljPerl::Logger;
 
+  our $VERSION = '0.01';
+  
   sub new {
     my $class = shift;
     my $type = shift;
