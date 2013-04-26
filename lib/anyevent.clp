@@ -5,6 +5,9 @@
   (defn condvar []
     (->AnyEvent condvar))
 
+  (defn cancel [o]
+    (set! o nil))
+
   (defn condvar-recv [cv]
     (.AnyEvent::CondVar::Base recv cv))
 
@@ -13,8 +16,5 @@
 
   (defn timer [opts]
     (->AnyEvent timer opts))
-
-  (defn cancel-timer [t]
-    (set! t nil))
 
   )

@@ -13,7 +13,7 @@
          (if (>= count 10)
            (begin 
              (anyevent#condvar-send cv)
-             (anyevent#cancel-timer t))))}))
+             (anyevent#cancel t))))}))
 
 (anyevent#condvar-recv cv)
 

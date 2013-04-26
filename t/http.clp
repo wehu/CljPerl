@@ -1,7 +1,13 @@
-(. require AnyEvent::HTTP)
+(require anyevent-http)
+(require anyevent)
 
-(->AnyEvent::HTTP http_get "https://www.google.com"
+(def cv (anyevent#condvar)) 
+
+(def hg (anyevent-http#get "http://www.google.com"
   (fn [data header]
     (println data)
-    (println header)))
+    (println header)
+    (anyevent#condvar-send cv)
+    (anyevent#cancel hg))))
 
+(anyevent#condvar-recv cv)
