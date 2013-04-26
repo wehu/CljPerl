@@ -60,6 +60,10 @@ sub use_lib {
 my $lib_path = File::Spec->rel2abs(dirname(__FILE__));
 use_lib($lib_path);
 
+sub gen_name {
+  return "gen-" . rand;
+}
+
 1;
 __END__
 

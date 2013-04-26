@@ -38,4 +38,5 @@
 (defn use-lib [path]
   (. use_lib path))
 
-
+(defn gen-name []
+  (perl->clj (. gen_name)))

@@ -172,6 +172,7 @@ package CljPerl::Evaler;
                   "namespace-begin"=>1,
                   "namespace-end"=>1,
                   "perl->clj"=>1,
+                  "clj->string"=>1,
                   "!"=>1,
                   "+"=>1,
                   "-"=>1,
@@ -773,6 +774,10 @@ package CljPerl::Evaler;
       my $m = $v->meta();
       $ast->error("no meta data in " . CljPerl::Printer::to_string($v)) if !defined $m;
       return $m;
+    } elsif($fn eq "clj->string") {
+      $ast->error("clj->string expects 1 argument") if $size != 2;
+     my $v = $self->_eval($ast->second());
+      return CljPerl::Atom->new("string", CljPerl::Printer::to_string($v));
     # (.namespace function args...)
     } elsif($fn =~ /^(\.|->)(\S*)$/) {
       my $blessed = $1;

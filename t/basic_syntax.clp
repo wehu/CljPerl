@@ -158,4 +158,6 @@
   (println "bbbb")
   (. puts f "aaa")))
 
+(println (clj->string {:a 'b}))
 
+(println (gen-name))
