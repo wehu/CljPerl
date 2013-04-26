@@ -127,7 +127,7 @@ package CljPerl::Evaler;
   sub load {
     my $self = shift;
     my $file = shift;
-    $file = $self->search_file($file);
+    $file = File::Spec->rel2abs($self->search_file($file));
     return 1 if exists $self->{loaded_files}->{$file};
     $self->{loaded_files}->{$file} = 1;
     push @{$self->{file_stack}}, $file;
