@@ -123,7 +123,7 @@ package CljPerl::Evaler;
         };
       }
     }
-    CljPerl::Printer::error("cannot find " . $file); 
+    CljPerl::Logger::error("cannot find " . $file); 
   }
 
   sub load {
@@ -277,8 +277,8 @@ package CljPerl::Evaler;
         $ast->error("keyword accessor expects a map or meta as the first arguments")
            if $mtype ne "map" and $mtype ne "meta";
         if($size == 2) {
-          $ast->error("key " . $fvalue . " does not exist")
-            if ! exists $mvalue->{$fvalue};
+          #$ast->error("key " . $fvalue . " does not exist")
+          return $nil  if ! exists $mvalue->{$fvalue};
           return $mvalue->{$fvalue};
         } elsif($size == 3) {
           $mvalue->{$fvalue} = $self->_eval($ast->third());
@@ -477,9 +477,9 @@ package CljPerl::Evaler;
       $ast->error("fn expects >= 3 arguments") if $size < 3;
       my $args = $ast->second();
       my $argstype = $args->type();
+      $ast->error("fn expects [arg ...] as formal argument list") if $argstype ne "vector";
       my $argsvalue = $args->value();
       my $argssize = $args->size();
-      $ast->error("fn expects [arg ...] as formal argument list") if $argstype ne "vector";
       my $i = 0;
       foreach my $arg (@{$argsvalue}) {
         $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
@@ -520,8 +520,13 @@ package CljPerl::Evaler;
     # (require "filename")
     } elsif($fn eq "require") {
       $ast->error("require expects 1 argument") if $size != 2;
-      my $m = $self->_eval($ast->second());
-      $ast->error("require expects a string") if $m->type() ne "string";
+      my $m = $ast->second();
+      if($m->type() eq "symbol" or $m->type() eq "keyword") {
+      } else {
+        $m = $self->_eval($m);
+        $ast->error("require expects a string or symbol or keyword")
+          if $m->type() ne "string";
+      };
       $self->load($m->value());
     # (list 'a 'b 'c)
     } elsif($fn eq "list") {
@@ -722,11 +727,13 @@ package CljPerl::Evaler;
     # (namespace-begin "ns")
     } elsif($fn eq "namespace-begin") {
       $ast->error("namespace-begin expects 1 argument") if $size != 2;
-      my $v = $self->_eval($ast->second());
-      $ast->error("namespace-begin expects string as argument")
-        if $v->type() ne "string"
-           and $v->type() ne "symbol"
-           and $v->type() ne "keyword";
+      my $v = $ast->second();
+      if($v->type() eq "symbol" or $v->type() eq "keyword") {
+      } else {
+        $v = $self->_eval($v);
+        $ast->error("namespace-begin expects string as argument")
+          if $v->type() ne "string";
+      };
       $self->push_namespace($v->value());
       return $v;
     # (namespace-end)

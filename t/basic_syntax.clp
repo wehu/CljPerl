@@ -158,10 +158,4 @@
   (println "bbbb")
   (. puts f "aaa")))
 
-(open ">t.txt" (fn [f]
-  (>> f "aaa")))
-
-(open "<t.txt" (fn [f]
-  (println (perl->clj (<< f)))))
-
 

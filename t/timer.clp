@@ -1,17 +1,19 @@
-(. require AnyEvent)
+(require anyevent)
 
-(def cv (->AnyEvent condvar))
+(def cv (anyevent#condvar))
 
 (def count 0)
 
-(def t (->AnyEvent timer
+(def t (anyevent#timer
   {:after 1
    :interval 1
    :cb (fn [ & args]
          (println count)
          (set! count (+ count 1))
          (if (>= count 10)
-           (set! t nil)))}))
+           (begin 
+             (anyevent#condvar-send cv)
+             (anyevent#cancel-timer t))))}))
 
-(.AnyEvent::CondVar::Base recv cv)
+(anyevent#condvar-recv cv)
 

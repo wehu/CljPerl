@@ -68,22 +68,23 @@ An example of using Perl's IO functions.
 	
 ####### CljPerl functions in core.clp
 
-	(defn open [file cb]
-	  (. open file cb))
+	(ns file
+	  (defn open [file cb]
+	    (. open file cb))
 	
-	(defn >> [fh str]
-	  (. puts fh str))
+	  (defn >> [fh str]
+	    (. puts fh str))
 	
-	(defn << [fh]
-	  (. readline fh))
+	  (defn << [fh]
+	    (. readline fh)))
 
 ####### Test
 
-	(open ">t.txt" (fn [f]
-	  (>> f "aaa")))
+	(file#open ">t.txt" (fn [f]
+	  (file#>> f "aaa")))
 	
-	(open "<t.txt" (fn [f]
-	  (println (perl->clj (<< f)))))
+	(file#open "<t.txt" (fn [f]
+	  (println (perl->clj (file#<< f)))))
 
 An advanced example which creates a timer with AnyEvent.
 

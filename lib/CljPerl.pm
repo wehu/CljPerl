@@ -381,19 +381,19 @@ An advanced example which creates a timer with AnyEvent.
 
  * map :
 
- * open : open a file with a callback.
+ * file#open : open a file with a callback.
 
-	(open ">file"
+	(file#open ">file"
 	  (fn [fh]
-	    (>> fn "foo")))
+	    (file#>> fn "foo")))
 
- * << : read a line from a file handler.
+ * file#<< : read a line from a file handler.
 
-	(<< fh)
+	(file#<< fh)
 
- * >> : write a string into a file handler.
+ * file#>> : write a string into a file handler.
 
-	(>> fh "foo")
+	(file#>> fh "foo")
 
 =head1 SEE ALSO
 
