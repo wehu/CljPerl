@@ -161,3 +161,7 @@
 (println (clj->string {:a 'b}))
 
 (println (gen-name))
+
+(println `:aa)
+
+(println (syntax `aa))

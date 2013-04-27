@@ -152,6 +152,7 @@ package CljPerl::Evaler;
 
   our $builtin_funcs = {
                   "eval"=>1,
+                  syntax=>1,
                   def=>1,
                   "set!"=>1,
                   fn=>1,
@@ -211,6 +212,13 @@ package CljPerl::Evaler;
       return $false;
     } elsif($type eq "symbol" and $value eq "nil") {
       return $nil;
+    } elsif($type eq "syntaxquotation" or $type eq "quotation") {
+      $self->{syntaxquotation_scope} += 1 if $type eq "syntaxquotation";
+      $self->{quotation_scope} += 1 if $type eq "quotation";
+      my $r = $self->bind($value);
+      $self->{syntaxquotation_scope} -= 1 if $type eq "syntaxquotation";
+      $self->{quotation_scope} -= 1 if $type eq "quotation";
+      return $r;
     } elsif(($type eq "symbol" and $self->{syntaxquotation_scope} == 0
         and $self->{quotation_scope} == 0) or
        ($type eq "dequotation" and $self->{syntaxquotation_scope} > 0)) {
@@ -230,12 +238,8 @@ package CljPerl::Evaler;
       return $q;
     } elsif($class eq "Seq") {
       return $empty_list if $type eq "list" and $ast->size() == 0;
-      $self->{syntaxquotation_scope} += 1 if $type eq "syntaxquotation";
-      $self->{quotation_scope} += 1 if $type eq "quotation";
       my $list = CljPerl::Seq->new("list");
-      if($type ne "syntaxquotation" and $type ne "quotation"){
-        $list->type($type);
-      };
+      $list->type($type);
       foreach my $i (@{$value}) {
         if($i->type() eq "dequotation" and $i->value() =~ /^@/){
           my $dl = $self->bind($i);
@@ -247,8 +251,6 @@ package CljPerl::Evaler;
           $list->append($self->bind($i));
         }
       }
-      $self->{syntaxquotation_scope} -= 1 if $type eq "syntaxquotation";
-      $self->{quotation_scope} -= 1 if $type eq "quotation";
       return $list;
     };
     return $ast;
@@ -437,10 +439,13 @@ package CljPerl::Evaler;
 
     # (eval "bla bla bla")
     if($fn eq "eval") {
-      $ast->error("eval expects 1 argument1") if $size != 2;
+      $ast->error("eval expects 1 argument") if $size != 2;
       my $s = $ast->second();
       $ast->error("eval expects 1 string as argument") if $s->type() ne "string";
       return $self->eval($s->value());
+    } elsif($fn eq "syntax") {
+      $ast->error("syntax expects 1 argument") if $size != 2;
+      return $self->bind($ast->second());
     # (def ^{} name value)
     } elsif($fn eq "def") {
       $ast->error($fn . " expects 2 arguments") if $size > 4 or $size < 3;
