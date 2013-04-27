@@ -350,7 +350,14 @@ package CljPerl::Evaler;
         my @rargs = $ast->slice(1 .. $size-1);
         my @args = ();
         foreach my $arg (@rargs) {
-          push @args, $self->clj2perl($arg);
+          my $pobj = $self->clj2perl($arg);
+          if(ref($pobj) eq "ARRAY") {
+            push @args, @{$pobj};
+          } elsif(ref($pobj) eq "HASH") {
+            push @args, %{$pobj};
+          } else {
+            push @args, $pobj;
+          };
         };
         my $perl_func = $f->value();
         return &wrap_perlobj(\&{$perl_func}(@args));
@@ -824,7 +831,14 @@ package CljPerl::Evaler;
         my @args = ();
         push @args, $ns if $blessed eq "->";
         foreach my $r (@rest) {
-          push @args, $self->clj2perl($self->_eval($r));
+          my $pobj = $self->clj2perl($self->_eval($r));
+          if(ref($pobj) eq "ARRAY") {
+            push @args, @{$pobj};
+          } elsif(ref($pobj) eq "HASH") {
+            push @args, %{$pobj};
+          } else {
+            push @args, $pobj;
+          }
         };
         return &wrap_perlobj(\$perl_func->(@args));
       }
@@ -870,13 +884,13 @@ package CljPerl::Evaler;
       foreach my $i (@{$value}) {
         push @r, $self->clj2perl($i);
       };
-      return @r;
+      return \@r;
     } elsif($type eq "map") {
       my %r = ();
       foreach my $k (keys %{$value}) {
         $r{$k} = $self->clj2perl($value->{$k});
       };
-      return %r;
+      return \%r;
     } elsif($type eq "function") {
       my $f = sub {
         my @args = @_;
