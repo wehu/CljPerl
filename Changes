@@ -1,6 +1,6 @@
 Revision history for Perl extension CljPerl.
 
 0.01  Mon Apr 22 11:25:10 2013
-	- original version; created by h2xs 1.23 with options
-		-AX CljPerl
-
+	- first version; baisc implementation.
+0.02  Sat Apr 27 12:53:00 2013
+	- test fix and doc update.
