@@ -4,3 +4,6 @@ Revision history for Perl extension CljPerl.
 	- first version; baisc implementation.
 0.02  Sat Apr 27 12:53:00 2013
 	- test fix and doc update.
+0.03  Sun Apr 28 15:58:00 2013
+	- change key/index accessor syntax.
+	- and 'let' and 'syntax' special form.

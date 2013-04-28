@@ -150,6 +150,12 @@
 
 	(set! foo "bar") 
 
+##### let :
+
+	(let [a 1
+	      b a]
+	  (println b))
+
 ##### defmacro :
 
 	(defmacro foo [arg & args]	

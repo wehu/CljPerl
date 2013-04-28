@@ -23,7 +23,7 @@ our @EXPORT = qw(
 	
 );
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 
 # Preloaded methods go here.
@@ -315,7 +315,13 @@ An advanced example which creates a timer with AnyEvent.
 
  * set! :
 
-	(set! foo "bar") 
+	(set! foo "bar")
+
+ * let :
+
+	(let [a 1
+	      b a]
+	  (println b)) 
 
  * defmacro :
 

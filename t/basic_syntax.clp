@@ -168,6 +168,6 @@
 
 (let [a 1]
   (let [a 2
-        b :b]
+        b a]
     (println a)
     (println b)))

@@ -3,7 +3,7 @@ package CljPerl::Logger;
   use strict;
   use warnings;
 
-  our $VERSION = '0.02';
+  our $VERSION = '0.03';
 
   sub error {
     my $msg = shift;
