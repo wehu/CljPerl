@@ -155,6 +155,7 @@ package CljPerl::Evaler;
                   syntax=>1,
                   def=>1,
                   "set!"=>1,
+                  let=>1,
                   fn=>1,
 		  defmacro=>1,
                   list=>1,
@@ -499,6 +500,27 @@ package CljPerl::Evaler;
       my $value = $self->_eval($ast->third());
       $self->var($name)->value($value);
       return $value;
+    } elsif($fn eq "let") {
+      $ast->error($fn . " expects >=3 arguments") if $size < 3;
+      my $vars = $ast->second();
+      $ast->error($fn . " expects a list [name value ...] as the first argument") if $vars->type() ne "vector";
+      my $varssize = $vars->size();
+      $ast->error($fn . " expects [name value ...] pairs as the first argument") if $varssize%2 != 0;
+      my $varvs = $vars->value();
+      $self->push_scope($self->current_scope());
+      for(my $i=0; $i < $varssize; $i+=2) {
+        my $n = $varvs->[$i];
+        my $v = $varvs->[$i+1];
+        $ast->error($fn . " expects a symbol as name") if $n->type() ne "symbol";
+        $self->new_var($n->value(), $self->_eval($v));
+      };
+      my @body = $ast->slice(2 .. $size-1);
+      my $res = $nil;
+      foreach my $b (@body){
+        $res = $self->_eval($b);
+      };
+      $self->pop_scope(); 
+      return $res;
     # (fn [args ...] body)
     } elsif($fn eq "fn") {
       $ast->error("fn expects >= 3 arguments") if $size < 3;

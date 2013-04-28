@@ -165,3 +165,9 @@
 (println `:aa)
 
 (println (syntax `aa))
+
+(let [a 1]
+  (let [a 2
+        b :b]
+    (println a)
+    (println b)))
