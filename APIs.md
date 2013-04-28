@@ -195,8 +195,15 @@
 ##### equal : for all objects.
 
 ##### . : (.[perl namespace] method args ...)
+        method name can be specifed with sigils to control what type of value should be passed into perl function.
+        ^[$@%!\\]?method[$@%\\]+
+        $ : scalar
+        @ : array
+        % : hash
+        ! : nil
 
 	(.CljPerl print "foo")
+	(.CljPerl !print$ "foo") ; return nil and pass first argument as a scalar
 
 ##### -> : (->[perl namespace] method args ...)
    Like '.', but this will pass perl namespace as first argument to perl method.
