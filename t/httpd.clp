@@ -8,5 +8,5 @@
   "/test"  (fn [hd req]
     (anyevent-httpd#respond req
       {"content" ["text/html"
-                  "<html><body><h1>Test page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))})
+                  "<html><body><h1>Test Page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))})
 
