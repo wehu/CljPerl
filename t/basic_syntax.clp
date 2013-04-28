@@ -74,14 +74,14 @@
 
 
 (def m {:abc 100})
-(println (:abc m))
-(:abc m 101)
-(println (:abc m))
+(println (#::abc m))
+(#::abc m 101)
+(println (#::abc m))
 
 (set! m [102 103])
-(println (0 m))
-(1 m 101)
-(println (1 m))
+(println (#:0 m))
+(#:1 m 101)
+(println (#:1 m))
 
 
 (.CljPerl print "aaa\n")
@@ -93,7 +93,7 @@
 (def ^{:a 'b} m 1)
 (println (meta m))
 (println (type m))
-(:a (meta m) 'c)
+(#::a (meta m) 'c)
 (println (meta m))
 
 (require "../lib/core.clp")
@@ -134,7 +134,7 @@
 (println (append {:a :b} {:c :d}))
 
 (println (keys {"a" :b :c :d}))
-(println ("a" {"a" :b}))
+(println (#:"a" {"a" :b}))
 
 (println (map (fn [i]
    (+ i 1))

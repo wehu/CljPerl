@@ -126,22 +126,23 @@ An example of using Perl's IO functions.
 	
 =head4 CljPerl functions in core.clp
 
-	(defn open [file cb]
-	  (. open file cb))
+	(ns file
+	  (defn open [file cb]
+	    (. open file cb))
 	
-	(defn >> [fh str]
-	  (. puts fh str))
+	  (defn >> [fh str]
+	    (. puts fh str))
 	
-	(defn << [fh]
-	  (. readline fh))
+	  (defn << [fh]
+	    (. readline fh)))
 
 =head4 Test
 
-	(open ">t.txt" (fn [f]
-	  (>> f "aaa")))
+	(file#open ">t.txt" (fn [f]
+	  (file#>> f "aaa")))
 	
-	(open "<t.txt" (fn [f]
-	  (println (perl->clj (<< f)))))
+	(file#open "<t.txt" (fn [f]
+	  (println (perl->clj (file#<< f)))))
 
 An advanced example which creates a timer with AnyEvent.
 
@@ -213,6 +214,14 @@ An advanced example which creates a timer with AnyEvent.
 
 	; comment
 
+ *  Dispatch (#) :
+
+   * Accessor (:) :
+
+	#:0 ; index accessor
+	#:"key" ; key accessor
+	#::key  ; key accessor
+
  * Metadata (^) :
 
 	^{:key value}
@@ -249,7 +258,7 @@ An advanced example which creates a timer with AnyEvent.
 
  * key accessor :
 
-	(:a {:a 'a :b 'a}) ;=> 'a
+	(#::a {:a 'a :b 'a}) ;=> 'a
 
  * keys :
 
@@ -257,7 +266,7 @@ An advanced example which creates a timer with AnyEvent.
 
  * index accessor :
 
-	(1 ['a 'b 'c]) ;=> 'b
+	(#:1 ['a 'b 'c]) ;=> 'b
 
  * length :
 

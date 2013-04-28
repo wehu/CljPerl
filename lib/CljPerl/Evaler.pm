@@ -212,6 +212,8 @@ package CljPerl::Evaler;
       return $false;
     } elsif($type eq "symbol" and $value eq "nil") {
       return $nil;
+    } elsif($type eq "accessor") {
+      return CljPerl::Atom->new("accessor", $self->bind($value));
     } elsif($type eq "syntaxquotation" or $type eq "quotation") {
       $self->{syntaxquotation_scope} += 1 if $type eq "syntaxquotation";
       $self->{quotation_scope} += 1 if $type eq "quotation";
@@ -272,12 +274,12 @@ package CljPerl::Evaler;
       my $fvalue = $f->value();
       if($ftype eq "symbol") {
 	return $self->builtin($f, $ast);
-      } elsif($ftype eq "keyword" or $ftype eq "string") {
-        $ast->error("keyword accessor expects >= 1 arguments") if $size == 1;
+      } elsif($ftype eq "key accessor") {
+        $ast->error("key accessor expects >= 1 arguments") if $size == 1;
         my $m = $self->_eval($ast->second());
         my $mtype = $m->type();
         my $mvalue = $m->value();
-        $ast->error("keyword accessor expects a map or meta as the first arguments")
+        $ast->error("key accessor expects a map or meta as the first arguments")
            if $mtype ne "map" and $mtype ne "meta";
         if($size == 2) {
           #$ast->error("key " . $fvalue . " does not exist")
@@ -287,9 +289,9 @@ package CljPerl::Evaler;
           $mvalue->{$fvalue} = $self->_eval($ast->third());
           return $mvalue->{$fvalue};
         } else {
-          $ast->error("keyword accessor expects <= 2 arguments");
+          $ast->error("key accessor expects <= 2 arguments");
         }
-      } elsif($ftype eq "number") {
+      } elsif($ftype eq "index accessor") {
         $ast->error("index accessor expects >= 1 arguments") if $size == 1;
         my $v = $self->_eval($ast->second());
         my $vtype = $v->type();
@@ -400,8 +402,20 @@ package CljPerl::Evaler;
 	$self->pop_scope();
 	return $self->_eval($res);
       } else {
-        $ast->error("expect a function or function name");
+        $ast->error("expect a function or function name or index/key accessor");
       };
+    } elsif($type eq "accessor") {
+      my $av = $self->_eval($value);
+      my $a = CljPerl::Atom->new("unknown", $av->value());
+      my $at = $av->type();
+      if($at eq "number") {
+        $a->type("index accessor");
+      } elsif($at eq "string" or $at eq "keyword") {
+        $a->type("key accessor");
+      } else {
+        $ast->error("unsupport type " . $at . " for accessor");
+      }
+      return $a;
     } elsif($type eq "symbol") {
       return $self->bind($ast);
     } elsif($type eq "syntaxquotation") {

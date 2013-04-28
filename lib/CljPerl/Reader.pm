@@ -185,8 +185,9 @@ package CljPerl::Reader;
 	return $self->seq("vector", "[", "]");
       } elsif($c eq '{') {
         return $self->seq("map", "{", "}");
-      #} elsif($c eq '#') {
-      #  return $self->dispatch();
+      } elsif($c eq '#') {
+        $self->consume(1);
+        return $self->dispatch();
       } elsif($c eq '^') {
         $self->consume(1);
         $self->error("meta should be a map") if $self->peekc() ne "{";
@@ -229,6 +230,21 @@ package CljPerl::Reader;
     };
     return undef;
   }
+
+  sub dispatch {
+    my $self = shift;
+    my $c = $self->peekc();
+    if(defined $c) {
+      if($c eq ":") {
+        $self->consume(1);
+        my $a = CljPerl::Atom->new("accessor", $self->lex());
+        return $a;  
+      } else {
+        $self->error("unsupport syntax for disptacher");
+      };
+    };
+    return undef;
+  };
 
   sub comment {
     my $self = shift;

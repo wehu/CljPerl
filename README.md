@@ -36,6 +36,10 @@ make use of the great resources from CPAN.
 
 	> bin/cljp t.clp
 
+## Install
+
+	cpan install CljPerl
+
 ## Lisp <-> Perl
 
 CljPerl is hosted on Perl. Any object of CljPerl can be passed into Perl and vice versa including code.
