@@ -862,21 +862,68 @@ package CljPerl::Evaler;
         $ast->error("cannot find $mn");
       } else {
         $ns = "CljPerl" if ! defined $ns or $ns eq "";
+        my $ret_type = "scalar";
+        if($perl_func =~ /^\@/){
+          $ret_type = "array";
+        } elsif($perl_func =~ /^\%/) {
+          $ret_type = "hash";
+        } elsif($perl_func =~ /^\\/) {
+          $ret_type = "ref";
+        } elsif($perl_func =~ /^!/) {
+          $ret_type = "nil";
+        };
+        my @fargtypes = ();
+        if($perl_func =~ /([\\\$\@\%]+)$/g){
+          @fargtypes = split //, $1;
+        };
+        $perl_func =~ s/[!\\\$\@\%]//g;
         $perl_func = $ns . "::" . $perl_func;
         my @rest = $ast->slice(2 .. $size-1);
         my @args = ();
         push @args, $ns if $blessed eq "->";
+        my $i = 0;
         foreach my $r (@rest) {
           my $pobj = $self->clj2perl($self->_eval($r));
-          if(ref($pobj) eq "ARRAY") {
-            push @args, @{$pobj};
-          } elsif(ref($pobj) eq "HASH") {
-            push @args, %{$pobj};
+          if($i < scalar @fargtypes) {
+            my $ft = $fargtypes[$i];
+            if($ft eq "\$") {
+              push @args, $pobj; 
+            } elsif($ft eq "\@") {
+              push @args, @{$pobj};
+            } elsif($ft eq "\%") {
+              push @args, %{$pobj};
+            } elsif($ft eq "\\") {
+              push @args, \$pobj;
+            } else {
+              push @args, $pobj;
+            };
           } else {
-            push @args, $pobj;
-          }
+            if(ref($pobj) eq "ARRAY") {
+              push @args, @{$pobj};
+            } elsif(ref($pobj) eq "HASH") {
+              push @args, %{$pobj};
+            } else {
+              push @args, $pobj;
+            };
+          };
+          $i ++;
         };
-        return &wrap_perlobj(\$perl_func->(@args));
+        if($ret_type eq "scalar") {
+          my $r = $perl_func->(@args);
+          return &wrap_perlobj($r);
+        } elsif($ret_type eq "array") {
+          my @r = $perl_func->(@args);
+          return &wrap_perlobj(@r);
+        } elsif($ret_type eq "hash") {
+          my %r = $perl_func->(@args);
+          return &wrap_perlobj(%r);
+        } elsif($ret_type eq "nil") {
+          $perl_func->(@args);
+          return $nil;
+        } else {
+          my $r = \$perl_func->(@args);
+          return &wrap_perlobj($r);
+        }
       }
     # (perl->clj o)
     } elsif($fn eq "perl->clj") {

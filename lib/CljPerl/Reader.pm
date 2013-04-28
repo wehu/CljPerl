@@ -362,7 +362,7 @@ package CljPerl::Reader;
 	    and $c ne '[' and $c ne ']'
 	    and $c ne '{' and $c ne '}') {
           $self->error("unexpected letter " . $c . " for symbol")
-            if $c =~ /[^0-9a-zA-Z_!&\?\*\/\.\+\|=%\$<>#@\:\-]/;
+            if $c =~ /[^0-9a-zA-Z_!&\?\*\/\.\+\|=%\$<>#@\:\-\\]/;
           $sym->{value} .= $c;
 	  $self->consume(1);
 	} else {
