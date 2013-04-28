@@ -109,6 +109,20 @@ An advanced example which creates a timer with AnyEvent.
 	
 	(.AnyEvent::CondVar::Base recv cv)
 
+Another example which use AnyEvent::HTTPD to create a http server.
+
+	(require anyevent-httpd)
+
+	(anyevent-httpd#start-server {:port 9090}
+	  {"/" (fn [hd req]
+	    (anyevent-httpd#respond req
+	      {"content" ["text/html"
+	                  "<html><body><h1>Hello World!</h1><a href=\"/test\">Another test page</a></body></html>"]})) 
+	  "/test"  (fn [hd req]
+	    (anyevent-httpd#respond req
+	      {"content" ["text/html"
+	                  "<html><body><h1>Test page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))}
+
 ## Documents
 
 See APIs.md

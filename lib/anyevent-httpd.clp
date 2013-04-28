@@ -14,4 +14,9 @@
   (defn run [s]
     (.AnyEvent::HTTPD run s))
 
+  (defn start-server [host-port opts]
+    (let [s (server host-port)]
+      (reg-cb s opts)
+      (run s)))
+
   )
