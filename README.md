@@ -109,7 +109,7 @@ An advanced example which creates a timer with AnyEvent.
 	
 	(.AnyEvent::CondVar::Base recv cv)
 
-Another example which use AnyEvent::HTTPD to create a http server.
+Another example which uses AnyEvent::HTTPD to create a http server.
 
 	(require anyevent-httpd)
 

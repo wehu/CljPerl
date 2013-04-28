@@ -7,3 +7,5 @@ Revision history for Perl extension CljPerl.
 0.03  Sun Apr 28 15:58:00 2013
 	- change key/index accessor syntax.
 	- and 'let' and 'syntax' special form.
+0.04  Sun Apr 28 19:45:00 2013
+	- Add sigils support for perl function prototype.
