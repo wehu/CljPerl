@@ -121,7 +121,7 @@ Another example which uses AnyEvent::HTTPD to create a http server.
 	  "/test"  (fn [hd req]
 	    (anyevent-httpd#respond req
 	      {"content" ["text/html"
-	                  "<html><body><h1>Test page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))}
+	                  "<html><body><h1>Test page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))})
 
 ## Documents
 
