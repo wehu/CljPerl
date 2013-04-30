@@ -135,9 +135,15 @@ package CljPerl::Evaler;
     push @{$self->{file_stack}}, $file;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
+    my $scopes_size = scalar @{$self->{scopes}};
+    my @non_global_range = 1 .. $scopes_size-1;
+    my @backup_stack = $self->{scopes}->[@non_global_range];
     my $res = undef;
     $reader->ast()->each(sub {$res = $self->_eval($_[0])});
     pop @{$self->{file_stack}};
+    my @nscopes = ($self->{scopes}->[0]);
+    $self->{scopes} = \@nscopes;
+    push @{$self->{scopes}}, @backup_scopes;
     return $res;
   }
 
