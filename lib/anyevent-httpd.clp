@@ -16,7 +16,12 @@
 
   (defn start-server [host-port opts]
     (let [s (server host-port)]
-      (reg-cb s opts)
+      (map (fn [k]
+        (reg-cb s {k (fn [s req]
+                       (respond req
+                         {"content" ["text/html"
+                                     (clj->string (#:k opts))]}))}))
+        (keys opts))
       (run s)))
 
   )
