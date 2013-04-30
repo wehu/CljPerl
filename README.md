@@ -8,6 +8,11 @@ However, programming in Lisp is more insteresting.
 CljPerl is a bridge between Lisp and Perl. We can program in Lisp and
 make use of the great resources from CPAN.
 
+## Key features
+
+ * Seamless connection with Perl.
+ * Natvie xml form support.
+
 ## Example
 
 	;; file t.clp
@@ -117,11 +122,11 @@ Another example which uses AnyEvent::HTTPD to create a http server.
 	  {"/" (fn [hd req]
 	    (anyevent-httpd#respond req
 	      {"content" ["text/html"
-	                  "<html><body><h1>Hello World!</h1><a href=\"/test\">Another test page</a></body></html>"]})) 
+	                  (clj->string #[html #[body #[h1 "Hello World!"] #[a ^{:href "/test"} "Another test page"]]])]}))
 	  "/test"  (fn [hd req]
 	    (anyevent-httpd#respond req
 	      {"content" ["text/html"
-	                  "<html><body><h1>Test page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))})
+	                  (clj->string #[html #[body #[h1 "Test page"] #[a ^{:href "/"} "Back to the main page"]]])]}))})
 
 ## Documents
 
