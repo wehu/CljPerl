@@ -866,7 +866,7 @@ package CljPerl::Evaler;
         $meta = $self->_eval($ast->third()) if defined $ast->third() and $ast->third()->type() eq "meta";
         $perl_func = $ns . "::" . $perl_func;
         my @rest = $ast->slice((defined $meta ? 3 : 2) .. $size-1);
-        unshift @rest, $ns if $blessed eq "->";
+        unshift @rest, CljPerl::Atom->new("string", $ns) if $blessed eq "->";
         return $self->perlfunc_call($perl_func, $meta, \@rest);
       }
     # (perl->clj o)
