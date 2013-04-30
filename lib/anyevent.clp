@@ -1,5 +1,7 @@
 (ns anyevent
 
+  (use-lib "/local_vol1_nobackup/usr/wehu/src/AnyEvent-7.04/lib")
+
   (. require AnyEvent)
 
   (defn condvar []
