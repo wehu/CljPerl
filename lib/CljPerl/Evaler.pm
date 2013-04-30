@@ -352,20 +352,71 @@ package CljPerl::Evaler;
 	$self->pop_scope();
 	return $res;
       } elsif($ftype eq "perlfunction") {
-        my @rargs = $ast->slice(1 .. $size-1);
-        my @args = ();
-        foreach my $arg (@rargs) {
-          my $pobj = $self->clj2perl($self->_eval($arg));
-          if(ref($pobj) eq "ARRAY") {
-            push @args, @{$pobj};
-          } elsif(ref($pobj) eq "HASH") {
-            push @args, %{$pobj};
-          } else {
-            push @args, $pobj;
+        my $meta = undef;
+        $meta = $self->_eval($ast->second()) if $ast->second() and $ast->second()->type() eq "meta";
+        my $ret_type = "scalar";
+        my @fargtypes = ();
+        if(defined $meta) {
+          if(exists $meta->value()->{"return"}) {
+            my $rt = $meta->value()->{"return"};
+            $ast->error("return expects a string") if $rt->type() ne "string";
+            $ret_type = $rt->value();
+          };
+          if(exists $meta->value()->{"arguments"}) {
+            my $ats = $meta->value()->{"arguments"};
+            $ast->error("arguments expect a vector") if $ats->type() ne "vector";
+            foreach my $arg (@{$ats->value()}) {
+              $ast->error("arguments expect a vector of string") if $arg->type() ne "string";
+              push @fargtypes, $arg->value();
+            };
           };
         };
         my $perl_func = $f->value();
-        return &wrap_perlobj(\&{$perl_func}(@args));
+        my @rargs = $ast->slice((defined $meta ? 2 : 1) .. $size-1);
+        my @args = ();
+        my $i = 0;
+        foreach my $arg (@rargs) {
+          my $pobj = $self->clj2perl($self->_eval($arg));
+          if($i < scalar @fargtypes) {
+            my $ft = $fargtypes[$i];
+            if($ft eq "scalar") {
+              push @args, $pobj;
+            } elsif($ft eq "array") {
+              push @args, @{$pobj};
+            } elsif($ft eq "hash") {
+              push @args, %{$pobj};
+            } elsif($ft eq "ref") {
+              push @args, \$pobj;
+            } else {
+              push @args, $pobj;
+            };
+          } else {
+            if(ref($pobj) eq "ARRAY") {
+              push @args, @{$pobj};
+            } elsif(ref($pobj) eq "HASH") {
+              push @args, %{$pobj};
+            } else {
+              push @args, $pobj;
+            };
+          };
+          $i ++;
+        };
+        if($ret_type eq "scalar") {
+          my $r = $perl_func->(@args);
+          return &wrap_perlobj($r);
+        } elsif($ret_type eq "array") {
+          my @r = $perl_func->(@args);
+          return &wrap_perlobj(@r);
+        } elsif($ret_type eq "hash") {
+          my %r = $perl_func->(@args);
+          return &wrap_perlobj(%r);
+        } elsif($ret_type eq "nil") {
+          $perl_func->(@args);
+          return $nil;
+        } else {
+          my $r = \$perl_func->(@args);
+          return &wrap_perlobj($r);
+        };
       } elsif($ftype eq "macro") {
         my $scope = $f->{context};
         my $fn = $f->value();
@@ -895,8 +946,8 @@ package CljPerl::Evaler;
         my @args = ();
         push @args, $ns if $blessed eq "->";
         my $i = 0;
-        foreach my $r (@rest) {
-          my $pobj = $self->clj2perl($self->_eval($r));
+        foreach my $arg (@rest) {
+          my $pobj = $self->clj2perl($self->_eval($arg));
           if($i < scalar @fargtypes) {
             my $ft = $fargtypes[$i];
             if($ft eq "scalar") {
