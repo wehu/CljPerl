@@ -215,6 +215,8 @@ package CljPerl::Evaler;
       return $nil;
     } elsif($type eq "accessor") {
       return CljPerl::Atom->new("accessor", $self->bind($value));
+    } elsif($type eq "sender") {
+      return CljPerl::Atom->new("sender", $self->bind($value));
     } elsif($type eq "syntaxquotation" or $type eq "quotation") {
       $self->{syntaxquotation_scope} += 1 if $type eq "syntaxquotation";
       $self->{quotation_scope} += 1 if $type eq "quotation";
@@ -417,6 +419,13 @@ package CljPerl::Evaler;
         $ast->error("unsupport type " . $at . " for accessor");
       }
       return $a;
+    } elsif($type eq "sender") {
+      my $sn = $self->_eval($value);
+      $ast->error("sender expects a string or keyword")
+        if $sn->type() ne "string"
+           and $sn->type() ne "keyword";
+      my $s = CljPerl::Atom->new("symbol", $sn->value());
+      return $self->bind($s);
     } elsif($type eq "symbol") {
       return $self->bind($ast);
     } elsif($type eq "syntaxquotation") {

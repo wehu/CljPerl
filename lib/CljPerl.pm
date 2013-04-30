@@ -222,6 +222,10 @@ An advanced example which creates a timer with AnyEvent.
 	#:"key" ; key accessor
 	#::key  ; key accessor
 
+   * Sender (!) :
+
+	#!"foo"
+
  * Metadata (^) :
 
 	^{:key value}
@@ -267,6 +271,10 @@ An advanced example which creates a timer with AnyEvent.
  * index accessor :
 
 	(#:1 ['a 'b 'c]) ;=> 'b
+
+ * sender :
+
+	(#:"foo" ['a 'b 'c]) ;=> (foo ['a 'b 'c])
 
  * length :
 

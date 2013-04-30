@@ -171,3 +171,7 @@
         b a]
     (println a)
     (println b)))
+
+(def sender (fn [ & args] (println args)))
+
+(#!"sender" "bbb")

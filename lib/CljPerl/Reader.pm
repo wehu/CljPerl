@@ -237,8 +237,10 @@ package CljPerl::Reader;
     if(defined $c) {
       if($c eq ":") {
         $self->consume(1);
-        my $a = CljPerl::Atom->new("accessor", $self->lex());
-        return $a;  
+        return CljPerl::Atom->new("accessor", $self->lex());
+      } elsif($c eq "!") {
+        $self->consume(1);
+        return CljPerl::Atom->new("sender", $self->lex());
       } else {
         $self->error("unsupport syntax for disptacher");
       };

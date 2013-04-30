@@ -55,6 +55,10 @@
 	#:"key" ; key accessor
 	#::key  ; key accessor
 
+###### Sender (!) :
+
+	#!"foo"
+
 ##### Metadata (^) :
 
 	^{:key value}
@@ -100,6 +104,10 @@
 ##### index accessor :
 
 	(#:1 ['a 'b 'c]) ;=> 'b
+
+##### sender :
+
+	(#:"foo" ['a 'b 'c]) ;=> (foo ['a 'b 'c])
 
 ##### length :
 
