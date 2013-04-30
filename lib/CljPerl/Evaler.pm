@@ -899,14 +899,18 @@ package CljPerl::Evaler;
     if(defined $meta) {
       if(exists $meta->value()->{"return"}) {
         my $rt = $meta->value()->{"return"};
-        $ast->error("return expects a string") if $rt->type() ne "string";
+        $ast->error("return expects a string or keyword")
+          if $rt->type() ne "string"
+             and $rt->type() ne "keyword";
         $ret_type = $rt->value();
       };
       if(exists $meta->value()->{"arguments"}) {
         my $ats = $meta->value()->{"arguments"};
         $ast->error("arguments expect a vector") if $ats->type() ne "vector";
         foreach my $arg (@{$ats->value()}) {
-          $ast->error("arguments expect a vector of string") if $arg->type() ne "string";
+          $ast->error("arguments expect a vector of string or keyword")
+            if $arg->type() ne "string"
+               and $arg->type() ne "keyword";
           push @fargtypes, $arg->value();
         };
       };
