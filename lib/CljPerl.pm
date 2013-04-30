@@ -226,6 +226,10 @@ An advanced example which creates a timer with AnyEvent.
 
 	#!"foo"
 
+   * XML ([) :
+
+	#[body ^{:attr "value"}]
+
  * Metadata (^) :
 
 	^{:key value}
@@ -275,6 +279,10 @@ An advanced example which creates a timer with AnyEvent.
  * sender :
 
 	(#:"foo" ['a 'b 'c]) ;=> (foo ['a 'b 'c])
+
+ * xml :
+
+	#[html ^{:class "markdown"} #[body "helleworld"]]
 
  * length :
 

@@ -241,6 +241,8 @@ package CljPerl::Reader;
       } elsif($c eq "!") {
         $self->consume(1);
         return CljPerl::Atom->new("sender", $self->lex());
+      } elsif($c eq '[') {
+        return $self->seq("xml", "[", "]");
       } else {
         $self->error("unsupport syntax for disptacher");
       };

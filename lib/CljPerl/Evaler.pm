@@ -135,9 +135,10 @@ package CljPerl::Evaler;
     push @{$self->{file_stack}}, $file;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
-    $reader->ast()->each(sub {$self->_eval($_[0])});
+    my $res = undef;
+    $reader->ast()->each(sub {$res = $self->_eval($_[0])});
     pop @{$self->{file_stack}};
-    return 1;
+    return $res;
   }
 
   sub eval {
@@ -299,8 +300,10 @@ package CljPerl::Evaler;
         my $v = $self->_eval($ast->second());
         my $vtype = $v->type();
         my $vvalue = $v->value();
-        $ast->error("index accessor expects a vector or list as the first arguments") if $vtype ne "vector" and $vtype ne "list";
-        $ast->error("index is bigger than vector size") if $fvalue >= scalar @{$vvalue};
+        $ast->error("index accessor expects a vector or list or xml as the first arguments")
+           if $vtype ne "vector" and $vtype ne "list"
+              and $vtype ne "xml";
+        $ast->error("index is bigger than size") if $fvalue >= scalar @{$vvalue};
         if($size == 2) {
           return $vvalue->[$fvalue];
         } elsif($size == 3) {
@@ -447,6 +450,29 @@ package CljPerl::Evaler;
       $m->value(\%mv);
       $m->type("meta") if $type eq "meta";
       return $m;
+    } elsif($class eq "Seq" and $type eq "xml") {
+      my $size = $ast->size();
+      $ast->error("xml expects >= 1 arguments") if $size == 0;
+      my $first = $ast->first();
+      $ast->error("xml expects a symbol as name") if $first->type() ne "symbol";
+      my @items = ();
+      my $xml = CljPerl::Atom->new("xml", \@items);
+      $xml->{name} = $first->value();
+      my @rest = $ast->slice(1 .. $size-1);
+      foreach my $i (@rest) {
+        my $iv = $self->_eval($i);
+        my $it = $iv->type();
+        $ast->error("xml expects string or xml or meta as items")
+          if $it ne "string"
+             and $it ne "xml"
+             and $it ne "meta";
+        if($it eq "meta") {
+          $xml->meta($iv->value());
+        } else {;
+          push @items, $iv;
+        };
+      };
+      return $xml;
     };
     return $ast;
   }

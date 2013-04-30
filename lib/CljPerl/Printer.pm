@@ -44,6 +44,19 @@ package CljPerl::Printer;
         }
         $s .= "}";
         $s =~ s/ \}$/\}/;
+      } elsif($type eq "xml") {
+        $s = "<";
+        $s .= $obj->{name};
+        if(defined $obj->{meta}) {
+          foreach my $i (keys %{$obj->meta()}) {
+            $s .= " " . $i . "=\"" . to_string($obj->meta()->{$i}) . "\"";
+          };
+        };
+        $s .= ">";
+        foreach my $i (@{$obj->value()}) {
+          $s .= to_string($i) . " ";
+        };
+        $s .= "</" . $obj->{name} . ">";
       } elsif($type eq "function" or $type eq "macro") {
         $s = to_string($obj->value());
       } else {

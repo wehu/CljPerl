@@ -175,3 +175,5 @@
 (def sender (fn [ & args] (println args)))
 
 (#!"sender" "bbb")
+
+(println #[abc ^{:abc "bb"} #[ccd]])

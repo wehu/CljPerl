@@ -59,6 +59,10 @@
 
 	#!"foo"
 
+###### XML ([) :
+
+	#[body ^{:attr "value"}]
+
 ##### Metadata (^) :
 
 	^{:key value}
@@ -108,6 +112,10 @@
 ##### sender :
 
 	(#:"foo" ['a 'b 'c]) ;=> (foo ['a 'b 'c])
+
+##### xml :
+
+	#[html ^{:class "markdown"} #[body "helleworld"]]
 
 ##### length :
 
