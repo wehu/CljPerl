@@ -11,7 +11,7 @@ make use of the great resources from CPAN.
 ## Key features
 
  * Seamless connection with Perl.
- * Natvie xml form support.
+ * Native XML form.
 
 ## Example
 
