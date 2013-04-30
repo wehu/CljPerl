@@ -11,7 +11,7 @@ make use of the great resources from CPAN.
 ## Key features
 
  * Seamless connection with Perl.
- * Native XML form.
+ * Native XML form which could be used to create web page template.
 
 ## Example
 
