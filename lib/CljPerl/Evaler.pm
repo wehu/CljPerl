@@ -353,7 +353,7 @@ package CljPerl::Evaler;
 	return $res;
       } elsif($ftype eq "perlfunction") {
         my $meta = undef;
-        $meta = $self->_eval($ast->second()) if $ast->second() and $ast->second()->type() eq "meta";
+        $meta = $self->_eval($ast->second()) if defined $ast->second() and $ast->second()->type() eq "meta";
         my $ret_type = "scalar";
         my @fargtypes = ();
         if(defined $meta) {
@@ -923,7 +923,7 @@ package CljPerl::Evaler;
       } else {
         $ns = "CljPerl" if ! defined $ns or $ns eq "";
         my $meta = undef;
-        $meta = $self->_eval($ast->third()) if $ast->third() and $ast->third()->type() eq "meta";
+        $meta = $self->_eval($ast->third()) if defined $ast->third() and $ast->third()->type() eq "meta";
         my $ret_type = "scalar";
         my @fargtypes = ();
         if(defined $meta) {
