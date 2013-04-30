@@ -4,9 +4,9 @@
   {"/" (fn [hd req]
     (anyevent-httpd#respond req
       {"content" ["text/html"
-                  "<html><body><h1>Hello World!</h1><a href=\"/test\">Another test page</a></body></html>"]})) 
+                  (clj->string #[html #[body #[h1 "Hello World!"] #[a ^{:href "/test"} "Another test page"]]])]})) 
   "/test"  (fn [hd req]
     (anyevent-httpd#respond req
       {"content" ["text/html"
-                  "<html><body><h1>Test Page</h1><a href=\"/\">Back to the main page</a></body></html>"]}))})
+                  (clj->string #[html #[body #[h1 "Test Page"] #[a ^{:href "/"} "Back to the main page"]]])]}))})
 
