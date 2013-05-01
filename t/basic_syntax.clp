@@ -177,3 +177,5 @@
 (#!"sender" "bbb")
 
 (println #[abc ^{:abc "bb"} #[ccd]])
+
+(println (match "(\\w)" "abc"))

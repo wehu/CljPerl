@@ -64,6 +64,13 @@ sub gen_name {
   return "gen-" . rand;
 }
 
+sub match {
+  my $regexp = shift;
+  my $str = shift;
+  my @m = ($str =~ qr($regexp));
+  return \@m;
+}
+
 1;
 __END__
 

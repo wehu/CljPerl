@@ -40,3 +40,8 @@
 
 (defn gen-name []
   (perl->clj (. gen_name)))
+
+; regexp
+(defn match [regexp str]
+  (perl->clj (. match regexp str)))
+

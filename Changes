@@ -9,3 +9,8 @@ Revision history for Perl extension CljPerl.
 	- and 'let' and 'syntax' special form.
 0.04  Sun Apr 28 19:45:00 2013
 	- Add sigils support for perl function prototype.
+0.05  TBD
+	- Change sigils syntax to use meta data.
+	- Add REPL.
+	- Add native XML form.
+	- Add regexp match form.
