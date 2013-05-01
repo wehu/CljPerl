@@ -204,6 +204,8 @@ package CljPerl::Evaler;
                   "->"=>1,
                   "eq"=>1,
                   "ne"=>1,
+		  "and"=>1,
+		  "or"=>1,
                   "equal"=>1,
                   "require"=>1,
 		  "read"=>1,
@@ -764,6 +766,19 @@ package CljPerl::Evaler;
         return $false;
       } else {
         return $true;
+      };
+    # (and/or true_or_false true_or_false)
+    } elsif($fn eq "and" or $fn eq "or") {
+      $ast->error($fn . " expects 2 arguments") if $size != 3;
+      my $v1 = $self->_eval($ast->second());
+      my $v2 = $self->_eval($ast->third());
+      $ast->error($fn . " expects bool as arguments")
+        if $v1->type() ne "bool" or $v2->type() ne "bool";
+      if(($fn eq "and" and $v1->value() eq "true" and $v2->value() eq "true")
+         or ($fn eq "or" and ($v1->value() eq "true" or $v2->value() eq "true"))) {
+        return $true;
+      } else {
+        return $false;
       };
     # (length list_or_vector_or_map_or_string)
     } elsif($fn eq "length") {

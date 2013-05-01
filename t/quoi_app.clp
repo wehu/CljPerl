@@ -1,9 +1,9 @@
 (require quoi)
 
-(quoi#page "/xx"
-  "t/a.gif")
+(quoi#page "/test$"
+  #[html #[body "test"]])
 
-(quoi#page "/"
+(quoi#page "/$"
   "t/index.clp")
 
 (quoi#start {:port 9090})

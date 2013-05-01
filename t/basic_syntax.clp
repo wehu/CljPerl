@@ -179,3 +179,8 @@
 (println #[abc ^{:abc "bb"} #[ccd]])
 
 (println (match "(\\w)" "abc"))
+
+(println (and true true))
+(println (or true false))
+(println (and true false))
+(println (or false false))
