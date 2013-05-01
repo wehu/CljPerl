@@ -8,13 +8,23 @@
   (def routings {})
 
   (defn page [url file]
-    (if (file#exists? file)
-      (#:url routings (read file))
-      (println (append file " does not exists"))))
+    (#:url routings (fn [] (read file))))
 
   (defn start [opts]
-    (anyevent-httpd#start-server
-      opts
-      routings))
+    (let [s (anyevent-httpd#server opts)]
+      (anyevent-httpd#reg-cb s
+        {:request
+          (fn [s req]
+            (let [url (anyevent-httpd#url req)]
+              (map (fn [k]
+                (let [m (match k url)]
+                  (if (> (length m) 0)
+                    (begin
+                      (anyevent-httpd#respond req
+                        {"content" ["text/html"
+                                    (clj->string ((#:k routings)))]})
+                      (anyevent-httpd#stop-respond s)))))
+                (keys routings))))})
+      (anyevent-httpd#run s)))
 
   )

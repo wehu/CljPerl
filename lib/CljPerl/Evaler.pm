@@ -144,8 +144,7 @@ package CljPerl::Evaler;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
     my $scopes_size = scalar @{$self->{scopes}};
-    my @non_global_range = 1 .. $scopes_size-1;
-    my @backup_scopes = $self->{scopes}->[@non_global_range];
+    my @backup_scopes = @{$self->{scopes}}[1 .. $scopes_size-1];
     my $res = undef;
     $reader->ast()->each(sub {$res = $self->_eval($_[0])});
     my @nscopes = ($self->{scopes}->[0]);
@@ -1088,6 +1087,7 @@ package CljPerl::Evaler;
 
   sub trace_vars {
     my $self = shift;
+    print @{$self->scopes()} . "\n";
     foreach my $vn (keys %{$self->current_scope()}) {
       print "$vn\n" # . CljPerl::Printer::to_string(${$self->current_scope()}{$vn}->value()) . "\n";
     };

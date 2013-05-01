@@ -1,5 +1,8 @@
 (require quoi)
 
+(quoi#page "/xx"
+  "t/a.gif")
+
 (quoi#page "/"
   "t/index.clp")
 
