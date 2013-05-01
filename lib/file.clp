@@ -7,4 +7,12 @@
     (. puts fh str))
 
   (defn << [fh]
-    (. readline fh)))
+    (. readline fh))
+
+  (defn exists? [f]
+    (let [r (perl->clj (. file_exists f))]
+      (if (equal r "1")
+        true
+        false)))
+
+  )

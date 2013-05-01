@@ -28,6 +28,7 @@ our $VERSION = '0.04';
 
 # Preloaded methods go here.
 
+# file
 sub print {
   print @_;
 }
@@ -52,6 +53,12 @@ sub readline {
   return <$fh>;
 }
 
+sub file_exists {
+  my $file = shift;
+  return \(-e $file);
+}
+
+# lib search path
 sub use_lib {
   my $path = shift;
   unshift @INC, $path;
@@ -64,6 +71,7 @@ sub gen_name {
   return "gen-" . rand;
 }
 
+# regexp
 sub match {
   my $regexp = shift;
   my $str = shift;

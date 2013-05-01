@@ -133,6 +133,14 @@ package CljPerl::Evaler;
     return 1 if exists $self->{loaded_files}->{$file};
     $self->{loaded_files}->{$file} = 1;
     push @{$self->{file_stack}}, $file;
+    my $res = $self->read($file);
+    pop @{$self->{file_stack}};
+    return $res;
+  }
+
+  sub read {
+    my $self = shift;
+    my $file = shift;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
     my $scopes_size = scalar @{$self->{scopes}};
@@ -140,7 +148,6 @@ package CljPerl::Evaler;
     my @backup_scopes = $self->{scopes}->[@non_global_range];
     my $res = undef;
     $reader->ast()->each(sub {$res = $self->_eval($_[0])});
-    pop @{$self->{file_stack}};
     my @nscopes = ($self->{scopes}->[0]);
     $self->{scopes} = \@nscopes;
     push @{$self->{scopes}}, @backup_scopes;
@@ -200,6 +207,7 @@ package CljPerl::Evaler;
                   "ne"=>1,
                   "equal"=>1,
                   "require"=>1,
+		  "read"=>1,
 	          println=>1, 
                   "trace-vars"=>1};
 
@@ -605,10 +613,16 @@ package CljPerl::Evaler;
       if($m->type() eq "symbol" or $m->type() eq "keyword") {
       } else {
         $m = $self->_eval($m);
-        $ast->error("require expects a string or symbol or keyword")
+        $ast->error("require expects a string")
           if $m->type() ne "string";
       };
-      $self->load($m->value());
+      return $self->load($m->value());
+    } elsif($fn eq "read") {
+      $ast->error("read expects 1 argument") if $size != 2;
+      my $f = $self->_eval($ast->second());
+      $ast->error("read expects a string")
+        if $f->type() ne "string";
+      return $self->read($f->value());
     # (list 'a 'b 'c)
     } elsif($fn eq "list") {
       return $emtpy_list if $size == 1;

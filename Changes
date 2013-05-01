@@ -12,5 +12,6 @@ Revision history for Perl extension CljPerl.
 0.05  TBD
 	- Change sigils syntax to use meta data.
 	- Add REPL.
+	- Add sender macro dispatcher.
 	- Add native XML form.
 	- Add regexp match form.
