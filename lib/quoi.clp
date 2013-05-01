@@ -2,12 +2,18 @@
 
   (require file)
   (require anyevent-httpd)
+  (require uri)
 
   (def routings {})
 
   (defn page [url file]
     (#:url routings (fn [req]
-      (def S {})
+      (def S {:request req
+              :url (anyevent-httpd#url req)
+              :path (uri#path (anyevent-httpd#url req))
+              :method (anyevent-httpd#method req)
+              :params (anyevent-httpd#params req)
+              :headers (anyevent-httpd#headers req)})
       (if (eq (type file) "xml")
         file
         (if (eq (type file) "function")
@@ -19,10 +25,11 @@
       (anyevent-httpd#reg-cb s
         {:request
           (fn [s req]
-            (let [url (anyevent-httpd#url req)]
+            (let [url (anyevent-httpd#url req)
+                  path (uri#path url)]
               (reduce (fn [k f]
                 (if f
-                  (let [m (match k url)]
+                  (let [m (match k path)]
                     (if (> (length m) 0)
                       (begin
                         (anyevent-httpd#respond req

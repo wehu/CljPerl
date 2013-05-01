@@ -18,7 +18,16 @@
     (.AnyEvent::HTTPD run s))
 
   (defn url [req]
-    (perl->clj (.AnyEvent::HTTPD::Request url req)))
+    (.AnyEvent::HTTPD::Request url req))
+
+  (defn method [req]
+    (perl->clj (.AnyEvent::HTTPD::Request method ^{:return "ref"} req)))
+
+  (defn params [req]
+    (perl->clj (.AnyEvent::HTTPD::Request vars ^{:return "ref"} req)))
+
+  (defn headers [req]
+    (perl->clj (.AnyEvent::HTTPD::Request headers ^{:return "ref"} req)))
 
   (defn start-server [host-port opts]
     (let [s (server host-port)]
