@@ -477,12 +477,17 @@ package CljPerl::Evaler;
       foreach my $i (@rest) {
         my $iv = $self->_eval($i);
         my $it = $iv->type();
-        $ast->error("xml expects string or xml or meta as items")
+        $ast->error("xml expects string or xml or meta or list as items")
           if $it ne "string"
              and $it ne "xml"
-             and $it ne "meta";
+             and $it ne "meta"
+             and $it ne "list";
         if($it eq "meta") {
           $xml->meta($iv->value());
+        } elsif($it eq "list") {
+	  foreach my $i (@{$iv->value()}) {
+            push @items, $i;
+	  };
         } else {;
           push @items, $iv;
         };
