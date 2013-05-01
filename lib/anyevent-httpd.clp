@@ -21,10 +21,16 @@
     (.AnyEvent::HTTPD::Request url req))
 
   (defn method [req]
-    (perl->clj (.AnyEvent::HTTPD::Request method ^{:return "ref"} req)))
+    (perl->clj (.AnyEvent::HTTPD::Request method req)))
 
   (defn params [req]
-    (perl->clj (.AnyEvent::HTTPD::Request vars ^{:return "ref"} req)))
+    (let [ps (perl->clj (.AnyEvent::HTTPD::Request params ^{:return "ref-array"} req))]
+      (reduce
+        (fn [p i]
+          (#:p i (perl->clj (.AnyEvent::HTTPD::Request parm req p)))
+          i)
+        {}
+        ps)))
 
   (defn headers [req]
     (perl->clj (.AnyEvent::HTTPD::Request headers ^{:return "ref"} req)))

@@ -10,7 +10,7 @@
     (#:url routings (fn [req]
       (def S {:request req
               :url (anyevent-httpd#url req)
-              :path (uri#path (anyevent-httpd#url req))
+              :path (uri#path-stem (anyevent-httpd#url req))
               :method (anyevent-httpd#method req)
               :params (anyevent-httpd#params req)
               :headers (anyevent-httpd#headers req)})
@@ -26,7 +26,7 @@
         {:request
           (fn [s req]
             (let [url (anyevent-httpd#url req)
-                  path (uri#path url)]
+                  path (uri#path-stem url)]
               (reduce (fn [k f]
                 (if f
                   (let [m (match k path)]

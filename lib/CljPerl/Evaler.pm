@@ -1016,12 +1016,21 @@ package CljPerl::Evaler;
     if($ret_type eq "scalar") {
       my $r = $perl_func->(@args);
       return &wrap_perlobj($r);
+    } elsif($ret_type eq "ref-scalar") {
+      my $r = $perl_func->(@args);
+      return &wrap_perlobj(\$r);
     } elsif($ret_type eq "array") {
       my @r = $perl_func->(@args);
       return &wrap_perlobj(@r);
+    } elsif($ret_type eq "ref-array") {
+      my @r = $perl_func->(@args);
+      return &wrap_perlobj(\@r);
     } elsif($ret_type eq "hash") {
       my %r = $perl_func->(@args);
       return &wrap_perlobj(%r);
+    } elsif($ret_type eq "ref-hash") {
+      my %r = $perl_func->(@args);
+      return &wrap_perlobj(\%r);
     } elsif($ret_type eq "nil") {
       $perl_func->(@args);
       return $nil;
@@ -1087,7 +1096,9 @@ package CljPerl::Evaler;
 
   sub perl2clj {
     my $v = shift; #$ast->value();
-    if(ref($v) eq "SCALAR") {
+    if(! defined ref($v) or ref($v) eq ""){
+      return CljPerl::Atom->new("string", $v);
+    } elsif(ref($v) eq "SCALAR") {
       return CljPerl::Atom->new("string", ${$v});
     } elsif(ref($v) eq "HASH") {
       my %m = ();
