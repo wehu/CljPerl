@@ -129,6 +129,8 @@ package CljPerl::Evaler;
   sub load {
     my $self = shift;
     my $file = shift;
+    CljPerl::Logger::error("cannot require file " . $file . " in non-global scope")
+      if scalar @{$self->scopes()} > 1;
     $file = File::Spec->rel2abs($self->search_file($file));
     return 1 if exists $self->{loaded_files}->{$file};
     $self->{loaded_files}->{$file} = 1;
