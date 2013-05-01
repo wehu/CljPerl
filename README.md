@@ -125,3 +125,52 @@ Another example which uses AnyEvent::HTTPD to create a http server.
 ## Documents
 
 See APIs.md
+
+## Quoi
+
+Quoi is a simple web framework by CljPerl.
+
+#### APP : app.clj
+
+	; load quoi
+	(require quoi)
+
+	(def alist (list "a" "b" "c"))
+
+	(map (fn [i]
+	  ; set page per item in alist 
+	  (quoi#page (append "/" (append i "$"))
+	    (fn [S]
+	      #[html
+	        #[body
+	        #[h1 i]
+	        #[p "url: " (#::path S)] ; S is an object hosts request/session information.
+	        #[p "method: " (#::method S)]
+	        #[p "params: " (clj->string (#::params S))]
+	        #[p "headers: " (clj->string (#::headers S))]]])))
+	  alist)
+
+	; set the index page.
+	(quoi#page "/$"
+	  "index.clp")
+
+	(quoi#start {:port 9090})
+
+#### Template : index.clp
+
+	#[html
+	  #[body
+	    #[h1 "hello world"]
+	    #[p "url: " (#::path S)]
+	    #[p "method: " (#::method S)]
+	    #[p "params: " (clj->string (#::params S))]
+	    #[p "headers: " (clj->string (#::headers S))] 
+	    #[ul (map
+	           (fn [i]
+	              #[li #[a ^{:href (append "/" i)} (append "item " i)]])
+	           (list "a" "b" "c"))]]]
+
+#### Run
+
+	bin/cljp app.clj
+	
