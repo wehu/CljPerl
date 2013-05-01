@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Cljperl by wehu</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Cljperl</h1>
+        <h2>CljPerl is a lisp on Perl.</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/wehu/CljPerl/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/wehu/CljPerl/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/wehu/CljPerl" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>CljPerl</h1>
+
+<p>CljPerl is a Lisp implemented by Perl. It borrows the idea from Clojure,
+which makes a seamless connection with Java packages.
+Like Java, Perl has huge number of CPAN packages.
+They are amazing resources. We should make use of them as possible.
+However, programming in Lisp is more insteresting.
+CljPerl is a bridge between Lisp and Perl. We can program in Lisp and
+make use of the great resources from CPAN.</p>
+
+<h2>Key features</h2>
+
+<ul>
+<li>Seamless connection with Perl.</li>
+<li>Native XML form which could be used to create web page template.</li>
+</ul><h2>Example</h2>
+
+<pre><code>;; file t.clp
+(defmacro defn [name args &amp; body]
+  `(def ~name
+     (fn ~args ~@body)))
+
+(defn foo [arg]
+  (println arg))
+
+(foo "hello world!") ;comment here
+
+(foo (+ 1 2))
+
+(.CljPerl print "Hi\n")
+
+(. print "Guy\n")
+
+(defmulti mf type)
+(defmethod mf "string" [a] (println "string"))
+(defmethod mf "keyword" [a] (println "keyword"))
+(mf "test")
+(mf :test)
+
+------------------
+
+&gt; bin/cljp t.clp
+</code></pre>
+
+<h2>Install</h2>
+
+<pre><code>cpan install CljPerl
+</code></pre>
+
+<h2>Lisp &lt;-&gt; Perl</h2>
+
+<p>CljPerl is hosted on Perl. Any object of CljPerl can be passed into Perl and vice versa including code.</p>
+
+<p>An example of using Perl's IO functions.</p>
+
+<h6># Perl functions in CljPerl.pm</h6>
+
+<pre><code>package CljPerl;
+
+sub open {
+  my $file = shift;
+  my $cb = shift;
+  my $fh;
+  open $fh, $file;
+  &amp;{$cb}($fh);
+  close $fh;
+}
+
+sub puts {
+  my $fh = shift;
+  my $str = shift;
+  print $fh $str;
+}
+
+sub readline {
+  my $fh = shift;
+  return &lt;$fh&gt;;
+}
+</code></pre>
+
+<h6># CljPerl functions in core.clp</h6>
+
+<pre><code>(ns file
+  (defn open [file cb]
+    (. open file cb))
+
+  (defn &gt;&gt; [fh str]
+    (. puts fh str))
+
+  (defn &lt;&lt; [fh]
+    (. readline fh)))
+</code></pre>
+
+<h6># Test</h6>
+
+<pre><code>(file#open "&gt;t.txt" (fn [f]
+  (file#&gt;&gt; f "aaa")))
+
+(file#open "&lt;t.txt" (fn [f]
+  (println (perl-&gt;clj (file#&lt;&lt; f)))))
+</code></pre>
+
+<p>An advanced example which creates a timer with AnyEvent.</p>
+
+<pre><code>(. require AnyEvent)
+
+(def cv (-&gt;AnyEvent condvar))
+
+(def count 0)
+
+(def t (-&gt;AnyEvent timer
+  {:after 1
+   :interval 1
+   :cb (fn [ &amp; args]
+         (println count)
+         (set! count (+ count 1))
+         (if (&gt;= count 10)
+           (set! t nil)))}))
+
+(.AnyEvent::CondVar::Base recv cv)
+</code></pre>
+
+<p>Another example which uses AnyEvent::HTTPD to create a http server.</p>
+
+<pre><code>(require anyevent-httpd)
+
+(anyevent-httpd#start-server {:port 9090}
+  {"/"     #[html #[body #[h1 "Hello World!"] #[a ^{:href "/test"} "Another test page"]]]
+  "/test"  #[html #[body #[h1 "Test page"] #[a ^{:href "/"} "Back to the main page"]]]})
+</code></pre>
+
+<h2>Documents</h2>
+
+<p>See APIs.md</p>
+
+<h2>Quoi</h2>
+
+<p>Quoi is a simple web framework by CljPerl.</p>
+
+<h4>APP : app.clj</h4>
+
+<pre><code>; load quoi
+(require quoi)
+
+(def alist (list "a" "b" "c"))
+
+(map (fn [i]
+  ; set page per item in alist 
+  (quoi#page (append "/" (append i "$"))
+    (fn [S]
+      #[html
+        #[body
+        #[h1 i]
+        #[p "url: " (#::path S)] ; S is an object hosts request/session information.
+        #[p "method: " (#::method S)]
+        #[p "params: " (clj-&gt;string (#::params S))]
+        #[p "headers: " (clj-&gt;string (#::headers S))]]])))
+  alist)
+
+; set the index page.
+(quoi#page "/$"
+  "index.clp")
+
+(quoi#start {:port 9090})
+</code></pre>
+
+<h4>Template : index.clp</h4>
+
+<pre><code>#[html
+  #[body
+    #[h1 "hello world"]
+    #[p "url: " (#::path S)]
+    #[p "method: " (#::method S)]
+    #[p "params: " (clj-&gt;string (#::params S))]
+    #[p "headers: " (clj-&gt;string (#::headers S))] 
+    #[ul (map
+           (fn [i]
+              #[li #[a ^{:href (append "/" i)} (append "item " i)]])
+           (list "a" "b" "c"))]]]
+</code></pre>
+
+<h4>Run</h4>
+
+<pre><code>bin/cljp app.clj
+</code></pre>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
