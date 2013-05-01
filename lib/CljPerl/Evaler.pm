@@ -143,13 +143,15 @@ package CljPerl::Evaler;
     my $file = shift;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
-    my $scopes_size = scalar @{$self->{scopes}};
-    my @backup_scopes = @{$self->{scopes}}[1 .. $scopes_size-1];
+    #my $scopes_size = scalar @{$self->{scopes}};
+    #my @backup_scopes = @{$self->{scopes}}[0 .. $scopes_size-2];
+    #my @nss = ($self->{scopes}->[$scopes_size-1]);
+    #$self->{scopes} = \@nss;
     my $res = undef;
     $reader->ast()->each(sub {$res = $self->_eval($_[0])});
-    my @nscopes = ($self->{scopes}->[0]);
-    $self->{scopes} = \@nscopes;
-    push @{$self->{scopes}}, @backup_scopes;
+    #$scopes_size = scalar @{$self->{scopes}};
+    #$self->{scopes} = \@backup_scopes;
+    #push @{$self->{scopes}}, $self->{scopes}->[$scopes_size-1];
     return $res;
   }
 
