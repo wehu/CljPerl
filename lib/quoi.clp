@@ -6,19 +6,22 @@
 
   (def routings {})
 
-  (defn page [url file]
+  (defn page [url file-fn-xml]
     (#:url routings (fn [req]
       (def S {:request req
               :url (anyevent-httpd#url req)
               :path (uri#path-stem (anyevent-httpd#url req))
               :method (anyevent-httpd#method req)
               :params (anyevent-httpd#params req)
-              :headers (anyevent-httpd#headers req)})
-      (if (eq (type file) "xml")
-        file
-        (if (eq (type file) "function")
-          (file S)
-          (read file))))))
+              :headers (anyevent-httpd#headers req)
+              :content (anyevent-httpd#content req)
+              :client-host (anyevent-httpd#client-host req)
+              :client-port (anyevent-httpd#client-port req)})
+      (if (eq (type file-fn-xml) "xml")
+        file-fn-xml
+        (if (eq (type file-fn-xml) "function")
+          (file-fn-xml S)
+          (read file-fn-xml))))))
 
   (defn start [opts]
     (let [s (anyevent-httpd#server opts)]

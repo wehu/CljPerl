@@ -35,6 +35,15 @@
   (defn headers [req]
     (perl->clj (.AnyEvent::HTTPD::Request headers ^{:return "ref"} req)))
 
+  (defn content [req]
+    (perl->clj (.AnyEvent::HTTPD::Request content req)))
+
+  (defn client-host [req]
+    (perl->clj (.AnyEvent::HTTPD::Request client_host req)))
+
+  (defn client-port [req]
+    (perl->clj (.AnyEvent::HTTPD::Request client_port req)))
+
   (defn start-server [host-port opts]
     (let [s (server host-port)]
       (map (fn [k]
