@@ -138,7 +138,7 @@ Quoi is a simple web framework by CljPerl.
 	; load quoi menu utils
 	(require quoi/menu)
 
-        ; create a menu
+	; create a menu
 	(def menu (quot#menu
 	  ["Home" "/home$" "home.clp"]
 	  ["About" "/about$" "about.clp"]))
@@ -163,4 +163,15 @@ Quoi is a simple web framework by CljPerl.
 #### Run
 
 	bin/cljp app.clj
-	
+
+#### XML selector/translator
+
+	($ "#foo" #[html "hello" #[a ^{:id "foo"} "foo"]]
+	  (fn [xml]
+	    #[a "bar"])) ; <html>hello<span>bar</span></html>
+
+	($ "[id=foo]" #[html "hello" #[a ^{:id "foo"} "foo"]]
+	  (fn [xml]
+	    #[span "bar"])) ; <html>hello<span>bar</bar></html>
+
+		
