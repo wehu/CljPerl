@@ -11,4 +11,7 @@
   (defn socket-on-read [s cb]
     (.CljPerl::SocketServer socket_on_read s cb))
 
+  (defn socket-destroy [s]
+    (.CljPerl::SocketServer socket_destroy s))
+
   )

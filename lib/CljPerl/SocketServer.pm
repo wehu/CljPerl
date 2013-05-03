@@ -78,5 +78,10 @@ sub socket_on_read {
   };
 };
 
+sub socket_destroy {
+  my $socket = shift;
+  $socket->destroy;
+};
+
 1;
 
