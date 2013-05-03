@@ -8,22 +8,22 @@
     (set! ajax-counter (+ ajax-counter 1))
     (clj->string ajax-counter))
 
-  (defn ajax-button [name S cb js-cb]
+  (defn ajax-button [name cb cbs]
     (let [id (gen-ajax-id)]
       (quoi#page (append "/ajax/" (append id "$"))
-        (cb S))
+        (fn [S] (cb S)))
         #[span
           #[input ^{:type "submit" :id id :value name}]
           #[script
-(append
+(append-list
 "
 $(document).ready(function(){
-  $('#"
-(append id (append "').on('click', function(){
-  $.ajax({url: '/ajax/" (append id (append "'}).done(" (append
-    js-cb
-");
+  $('#" id "').on('click', function(){
+    " (if (equal (#::on-click cbs) nil) "" (#::on-click cbs)) "
+  $.ajax({url: '/ajax/" id "'}).done("
+    (if (equal (#::ajax-done cbs) nil) "" (#::ajax-done cbs))
+  ");
 })});
-"))))))]]))
+")]]))
 
   )

@@ -766,14 +766,16 @@ package CljPerl::Evaler;
       my $r = 0;
       if($v1->type() ne $v2->type()) {
         $r = 0;
-      } elsif(($v1->type() eq "string" and $v2->type() eq "string")
-              or ($v1->type() eq "keyword" and $v2->type() eq "keyword")
-              or ($v1->type() eq "quotation" and $v2->type() eq "quotation")){
+      } elsif($v1->type() eq "string"
+              or $v1->type() eq "keyword"
+              or $v1->type() eq "quotation"
+              or $v1->type() eq "bool"
+              or $v1->type() eq "nil"){
         $r = $v1->value() eq $v2->value();
-      } elsif($v1->type() eq "number" and $v2->type() eq "number"){
+      } elsif($v1->type() eq "number"){
         $r = $v1->value() == $v2->value();
       } else {
-        $r = $v1->value() == $v2->value();
+        $r = $v1->value() eq $v2->value();
       };
       if($r){
         return $true;

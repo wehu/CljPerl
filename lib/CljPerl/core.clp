@@ -34,6 +34,17 @@
     ()
     alist))
 
+(defn append-list [f & alist]
+  (reduce
+    (fn [a i]
+      (append i a))
+    (if (eq (type f) "string")
+      ""
+      (if (eq (type f) "list")
+        ()
+        []))
+    (cons f alist)))
+
 ; append lib search path
 (defn use-lib [path]
   (. use_lib path))
