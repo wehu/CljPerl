@@ -1,6 +1,14 @@
 (ns quoi
 
-  (defn comet-server []
-    "")
+  (. require CljPerl::SocketServer)
+
+  (defn comet-server [host port cb]
+    (.CljPerl::SocketServer socket_server host port cb))
+
+  (defn socket-send [s msg]
+    (.CljPerl::SocketServer socket_send s msg))
+
+  (defn socket-on-read [s cb]
+    (.CljPerl::SocketServer socket_on_read s cb))
 
   )
