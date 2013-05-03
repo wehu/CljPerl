@@ -187,7 +187,7 @@
 
 (println (xml-name #[html]))
 
-(require "xml/selector")
+(require "xml")
 
 (println ($ "#aa" #[html "aaaa" #[a ^{:id "aa"} "a"]]
   (fn [xml]
