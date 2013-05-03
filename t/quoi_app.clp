@@ -1,6 +1,11 @@
 (require quoi)
+(require quoi/menu)
 
 (def alist (list "a" "b" "c"))
+
+(def menu (quoi#menu
+  ["Home" "/home$" "home.clp"]
+  ["About" "/about$" "about.clp"]))
 
 (map (fn [i]
   (quoi#page (append "/" (append i "$"))

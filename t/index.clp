@@ -8,6 +8,7 @@
     #[p "content: " (clj->string (#::content S))]
     #[p "client host: " (#::client-host S)]
     #[p "client port: " (#::client-port S)]
+    menu
     #[ul (map
            (fn [i]
               #[li #[a ^{:href (append "/" i)} (append "item " i)]])
