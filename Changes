@@ -15,3 +15,5 @@ Revision history for Perl extension CljPerl.
 	- Add sender macro dispatcher.
 	- Add native XML form.
 	- Add regexp match form.
+0.06  Sat May 04 02:24:00 2013
+	- quoi web framework.
