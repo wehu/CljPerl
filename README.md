@@ -140,8 +140,8 @@ Quoi is a simple web framework by CljPerl.
 
 	; create a menu
 	(def menu (quoi#menu
-	  ["Home" "home" (quoi#file (read "index.clp")]
-	  ["About" "about" (quoi#file (read "about.clp")]))
+	  ["Home" "home" (quoi#file "index.clp")]
+	  ["About" "about" (quoi#file "about.clp")]))
 
 	; set the index page.
 	(quoi#page "/$"
@@ -151,14 +151,13 @@ Quoi is a simple web framework by CljPerl.
 
 #### Template : index.clp
 
-	#[html
-	  #[body
-	    #[h1 "hello world"]
-	    #[p "url: " (#::path S)]
-	    #[p "method: " (#::method S)]
-	    #[p "params: " (clj->string (#::params S))]
-	    #[p "headers: " (clj->string (#::headers S))] 
-	    menu]]
+	#[span
+	  #[h1 "hello world"]
+	  #[p "url: " (#::path S)]
+	  #[p "method: " (#::method S)]
+	  #[p "params: " (clj->string (#::params S))]
+	  #[p "headers: " (clj->string (#::headers S))] 
+	  menu]
 
 #### Run
 

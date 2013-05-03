@@ -1,6 +1,5 @@
-#[html
+#[span
   menu
-  #[center
-     #[p "Quoi"]
-     #[hr]
-     #[p "Copyright@wehu"]]]
+  #[p ^{:style "text-align:center"} "Quoi: a simple web framework by CljPerl"]
+  #[hr]
+  #[p ^{:style "text-align:center"} "Copyright@wehu"]]

@@ -14,7 +14,7 @@
   (quoi#page (append "/" (append i "$"))
     (quoi#default-template title
     (fn [S]
-      #[html #[body
+      #[span
         menu
         #[h1 i]
         #[p "url: " (#::path S)]
@@ -24,7 +24,7 @@
         #[p "content: " (clj->string (#::content S))]
         #[p "client host: " (#::client-host S)]
         #[p "client port: " (#::client-port S)]
-        #[a ^{:href "/"} "return"]]]))))
+        #[a ^{:href "/"} "return"]]))))
   alist)
 
 (quoi#page "/$"
