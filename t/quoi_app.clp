@@ -1,10 +1,22 @@
 (require quoi)
 (require quoi/menu)
+(require quoi/table)
 (require quoi/default_template)
 
 (def alist (list "a" "b" "c"))
 
 (def title "Quoi")
+
+(defn req-info [S]
+  (quoi#sortable-table
+    ["name" "value"] 
+    ["path: " (#::path S)]
+    ["method: " (#::method S)]
+    ["params: " (clj->string (#::params S))]
+    ["headers: " (clj->string (#::headers S))]
+    ["content: " (clj->string (#::content S))]
+    ["client host: " (#::client-host S)]
+    ["client port: " (#::client-port S)]))
 
 (def menu (quoi#menu
   ["Home" "home" (quoi#default-template title (quoi#file "t/index.clp"))]
@@ -17,14 +29,8 @@
       #[span
         menu
         #[h1 i]
-        #[p "url: " (#::path S)]
-        #[p "method: " (#::method S)]
-        #[p "params: " (clj->string (#::params S))]
-        #[p "headers: " (clj->string (#::headers S))]
-        #[p "content: " (clj->string (#::content S))]
-        #[p "client host: " (#::client-host S)]
-        #[p "client port: " (#::client-port S)]
-        #[a ^{:href "/"} "return"]]))))
+        (req-info S)
+        ]))))
   alist)
 
 (quoi#page "/$"

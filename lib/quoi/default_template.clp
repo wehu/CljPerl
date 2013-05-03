@@ -24,6 +24,10 @@
          #[script ^{:src "https://raw.github.com/briancherne/jquery-hoverIntent/master/jquery.hoverIntent.js"
                     :type "text/javascript"}]
          #[script ^{:src "https://raw.github.com/joeldbirch/superfish/master/js/superfish.js"
+                    :type "text/javascript"}]
+         #[link ^{:href "http://tablesorter.com/themes/blue/style.css"
+                  :rel "stylesheet"}]
+         #[script ^{:src "http://tablesorter.com/__jquery.tablesorter.js"
                     :type "text/javascript"}]]
       #[body
          #[h1 ^{:style "text-align: left"} title]
@@ -34,6 +38,9 @@
              xml
              (if (eq t "function")
                (x S)
-               (read x))))]]))
+               (read x))))
+         #[br]
+         #[hr]
+         #[p ^{:style "text-align:center"} "Copyright@wehu"]]]))
 
   )

@@ -33,7 +33,7 @@ sub print {
   print @_;
 }
 
-sub open {
+sub openfile {
   my $file = shift;
   my $cb = shift;
   my $fh;
@@ -51,6 +51,15 @@ sub puts {
 sub readline {
   my $fh = shift;
   return <$fh>;
+}
+
+sub readlines {
+  my $file = shift;
+  my $fh;
+  open $fh, "<$file";
+  my @lines = <$fh>;
+  close $fh;
+  return join("\n", @lines);
 }
 
 sub file_exists {

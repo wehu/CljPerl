@@ -1,7 +1,7 @@
 (ns file
   ; file
   (defn open [file cb]
-    (. open file cb))
+    (. openfile file cb))
 
   (defn >> [fh str]
     (. puts fh str))
@@ -14,5 +14,8 @@
       (if (equal r "1")
         true
         false)))
+
+  (defn readlines [file]
+    (. readlines file))
 
   )
