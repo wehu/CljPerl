@@ -214,6 +214,7 @@ package CljPerl::Evaler;
                   "require"=>1,
 		  "read"=>1,
 	          println=>1, 
+                  "xml-name"=>1,
                   "trace-vars"=>1};
 
   our $empty_list = CljPerl::Seq->new("list");
@@ -473,7 +474,15 @@ package CljPerl::Evaler;
       my $size = $ast->size();
       $ast->error("xml expects >= 1 arguments") if $size == 0;
       my $first = $ast->first();
-      $ast->error("xml expects a symbol as name") if $first->type() ne "symbol";
+      my $firsttype = $first->type(); 
+      if($firsttype ne "symbol") {
+        $first = $self->_eval($first);
+        $firsttype = $first->type();
+      };
+      $ast->error("xml expects a symbol or string or keyword as name")
+        if $firsttype ne "symbol"
+           and $firsttype ne "string"
+           and $firsttype ne "keyword";
       my @items = ();
       my $xml = CljPerl::Atom->new("xml", \@items);
       $xml->{name} = $first->value();
@@ -487,7 +496,7 @@ package CljPerl::Evaler;
              and $it ne "meta"
              and $it ne "list";
         if($it eq "meta") {
-          $xml->meta($iv->value());
+          $xml->meta($iv);
         } elsif($it eq "list") {
 	  foreach my $i (@{$iv->value()}) {
             push @items, $i;
@@ -730,6 +739,11 @@ package CljPerl::Evaler;
       } else {
         return $false;
       }
+    } elsif($fn eq "xml-name") {
+      $ast->error($fn . " expects 1 argument") if $size != 2;
+      my $v = $self->_eval($ast->second());
+      $ast->error($fn . " expects xml as argument") if $v->type() ne "xml"; 
+      return CljPerl::Atom->new("string", $v->{name}); 
     # eq ne for string comparing
     } elsif($fn =~ /^(eq|ne)$/) {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
@@ -789,19 +803,19 @@ package CljPerl::Evaler;
       } else {
         return $false;
       };
-    # (length list_or_vector_or_map_or_string)
+    # (length list_or_vector_or_xml_map_or_string)
     } elsif($fn eq "length") {
       $ast->error("length expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
       my $r = CljPerl::Atom->new("number", 0);
       if($v->type() eq "string"){
         $r->value(length($v->value()));
-      } elsif($v->type() eq "list" or $v->type() eq "vector"){
+      } elsif($v->type() eq "list" or $v->type() eq "vector" or $v->type() eq "xml"){
         $r->value(scalar @{$v->value()});
       } elsif($v->type() eq "map") {
         $r->value(scalar %{$v->value()});
       } else {
-        $ast->error("unexpected type of argument for length");
+        $ast->error("unexpected type " . $v->type() . " of argument for length");
       };
       return $r;
     # (append list1 list2)

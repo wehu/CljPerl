@@ -184,3 +184,15 @@
 (println (or true false))
 (println (and true false))
 (println (or false false))
+
+(println (xml-name #[html]))
+
+(require "xml/selector")
+
+(println ($ "#aa" #[html "aaaa" #[a ^{:id "aa"} "a"]]
+  (fn [xml]
+    #[b "aaa"])))
+
+(println ($ "[id=aa]" #[html "aaaa" #[a ^{:id "aa"} "a"]]
+  (fn [xml]
+    #[b "aaa"])))

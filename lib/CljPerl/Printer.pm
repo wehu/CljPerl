@@ -48,8 +48,9 @@ package CljPerl::Printer;
         $s = "<";
         $s .= $obj->{name};
         if(defined $obj->{meta}) {
-          foreach my $i (keys %{$obj->meta()}) {
-            $s .= " " . $i . "=\"" . to_string($obj->meta()->{$i}) . "\"";
+          my %meta = %{$obj->meta()->value()};
+          foreach my $i (keys %meta) {
+            $s .= " " . $i . "=\"" . to_string($meta{$i}) . "\"";
           };
         };
         $s .= ">";
