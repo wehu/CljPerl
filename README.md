@@ -140,12 +140,12 @@ Quoi is a simple web framework by CljPerl.
 
 	; create a menu
 	(def menu (quoi#menu
-	  ["Home" "home" (fn [S] (read "index.clp"))]
-	  ["About" "about" (fn [S] (read "about.clp"))]))
+	  ["Home" "home" (quoi#file (read "index.clp")]
+	  ["About" "about" (quoi#file (read "about.clp")]))
 
 	; set the index page.
 	(quoi#page "/$"
-	  (fn [S] (read "index.clp")))
+	  (quoi#file "index.clp"))
 
 	(quoi#start {:port 9090})
 

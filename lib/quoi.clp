@@ -6,6 +6,9 @@
 
   (def routings {})
 
+  (defmacro file [n]
+    `(fn [S] (read ~n)))
+
   (defn page [url file-fn-xml]
     (#:url routings (fn [req]
       (def S {:request req
