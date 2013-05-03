@@ -154,7 +154,7 @@
   (def bar0 'bar1)
   (println (foo#bar)))
 
-(. open ">t.txt" (fn [f]
+(. openfile ">t.txt" (fn [f]
   (println "bbbb")
   (. puts f "aaa")))
 
