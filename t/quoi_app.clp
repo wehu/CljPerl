@@ -4,13 +4,14 @@
 (def alist (list "a" "b" "c"))
 
 (def menu (quoi#menu
-  ["Home" "/home$" "home.clp"]
-  ["About" "/about$" "about.clp"]))
+  ["Home" "home" (fn [S] (read "t/index.clp"))]
+  ["About" "about" (fn [S] (read "t/about.clp"))]))
 
 (map (fn [i]
   (quoi#page (append "/" (append i "$"))
     (fn [S]
       #[html #[body
+        menu
         #[h1 i]
         #[p "url: " (#::path S)]
         #[p "method: " (#::method S)]

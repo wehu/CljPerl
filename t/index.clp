@@ -1,5 +1,6 @@
 #[html
   #[body
+    menu
     #[h1 "hello world"]
     #[p "url: " (#::path S)]
     #[p "method: " (#::method S)]
@@ -8,7 +9,6 @@
     #[p "content: " (clj->string (#::content S))]
     #[p "client host: " (#::client-host S)]
     #[p "client port: " (#::client-port S)]
-    menu
     #[ul (map
            (fn [i]
               #[li #[a ^{:href (append "/" i)} (append "item " i)]])

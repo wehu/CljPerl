@@ -7,6 +7,7 @@ package CljPerl::Printer;
 
   sub to_string {
     my $obj = shift;
+    return "" if !defined $obj;
     my $class = $obj->class();
     my $type = $obj->type();
     my $s = "";

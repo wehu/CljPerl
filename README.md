@@ -139,9 +139,9 @@ Quoi is a simple web framework by CljPerl.
 	(require quoi/menu)
 
 	; create a menu
-	(def menu (quot#menu
-	  ["Home" "/home$" "home.clp"]
-	  ["About" "/about$" "about.clp"]))
+	(def menu (quoi#menu
+	  ["Home" "home" (fn [S] (read "index.clp"))]
+	  ["About" "about" (fn [S] (read "about.clp"))]))
 
 	; set the index page.
 	(quoi#page "/$"
