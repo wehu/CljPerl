@@ -96,7 +96,7 @@
 (#::a (meta m) 'c)
 (println (meta m))
 
-(require "../lib/core.clp")
+(require "../lib/CljPerl/core.clp")
 
 (defmulti mf type)
 (println (meta mf))

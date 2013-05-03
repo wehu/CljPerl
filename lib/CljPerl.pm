@@ -73,7 +73,7 @@ sub use_lib {
   unshift @INC, $path;
 }
 
-my $lib_path = File::Spec->rel2abs(dirname(__FILE__));
+my $lib_path = File::Spec->rel2abs(dirname(__FILE__) . "/CljPerl");
 use_lib($lib_path);
 
 sub gen_name {
