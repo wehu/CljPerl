@@ -35,15 +35,24 @@
                   path (uri#path-stem url)]
               (reduce (fn [k f]
                 (if f
-                  (let [m (match k path)]
+                  (let [m (match "^/(image|javascript|stylesheet)s/(\\S+)" path)]
                     (if (> (length m) 0)
-                      (begin
-                        (anyevent-httpd#respond req
-                          {"content" ["text/html"
-                                      (clj->string ((#:k routings) req))]})
-                        (anyevent-httpd#stop-respond s)
-                        false)
-                      f))
+                      (let [t (#:0 m)
+                            f (#:1 m)]
+                        (begin
+                          (anyevent-httpd#respond req
+                            {"content" [(append "text/" t)
+                                        (file#readlines (append t (append "s/" f)))]})
+                          false))
+                      (let [m (match k path)]
+                        (if (> (length m) 0)
+                          (begin
+                            (anyevent-httpd#respond req
+                              {"content" ["text/html"
+                                          (clj->string ((#:k routings) req))]})
+                            (anyevent-httpd#stop-respond s)
+                            false)
+                          f))))
                   f))
                 true
                 (keys routings))))})

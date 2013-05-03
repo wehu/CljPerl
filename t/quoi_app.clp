@@ -8,6 +8,8 @@
 (def title "Quoi")
 
 (defn req-info [S]
+  #[span
+   #[p "Http Request Information"] 
   (quoi#sortable-table
     ["name" "value"] 
     ["path: " (#::path S)]
@@ -16,9 +18,9 @@
     ["headers: " (clj->string (#::headers S))]
     ["content: " (clj->string (#::content S))]
     ["client host: " (#::client-host S)]
-    ["client port: " (#::client-port S)]))
+    ["client port: " (#::client-port S)])])
 
-(def menu (quoi#menu
+(def menu (quoi#superfish-menu
   ["Home" "home" (quoi#default-template title (quoi#file "t/index.clp"))]
   ["About" "about" (quoi#default-template title (quoi#file "t/about.clp"))]))
 

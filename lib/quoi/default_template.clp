@@ -10,24 +10,24 @@
          #[meta ^{:name "keywords" :content ""}]
          #[title ~title]
          #[script ^{:id "jquery"
-                    :src "http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"
+                    :src "/javascripts/jquery-1.9.1.min.js"
                     :type "text/javascript"}]
-         #[link ^{:href "http://kevinburke.bitbucket.org/markdowncss/markdown.css"
+         #[link ^{:href "/stylesheets/markdown.css"
                   :rel "stylesheet"}]
-         #[link ^{:href "https://raw.github.com/joeldbirch/superfish/master/css/superfish.css"
+         #[link ^{:href "/stylesheets/superfish.css"
                   :media "screen"
                   :rel "stylesheet"}]
-         #[link ^{:href "https://raw.github.com/joeldbirch/superfish/master/css/superfish-vertical.css"
+         #[link ^{:href "/stylesheets/superfish-vertical.css"
                   :rel "stylesheet"}]
-         #[link ^{:href "https://raw.github.com/joeldbirch/superfish/master/css/superfish-navbar.css"
+         #[link ^{:href "/stylesheets/superfish-navbar.css"
                   :rel "stylesheet"}]
-         #[script ^{:src "https://raw.github.com/briancherne/jquery-hoverIntent/master/jquery.hoverIntent.js"
+         #[script ^{:src "/javascripts/hoverIntent.js"
                     :type "text/javascript"}]
-         #[script ^{:src "https://raw.github.com/joeldbirch/superfish/master/js/superfish.js"
+         #[script ^{:src "/javascripts/superfish.js"
                     :type "text/javascript"}]
-         #[link ^{:href "http://tablesorter.com/themes/blue/style.css"
+         #[link ^{:href "/stylesheets/themes/blue/style.css"
                   :rel "stylesheet"}]
-         #[script ^{:src "http://tablesorter.com/__jquery.tablesorter.js"
+         #[script ^{:src "/javascripts/jquery.tablesorter.min.js"
                     :type "text/javascript"}]]
       #[body
          #[h1 ^{:style "text-align: left"} title]
