@@ -68,7 +68,7 @@ sub socket_server {
 sub socket_send {
   my $socket = shift;
   my $msg = shift;
-  if(defined $socket and $socket ne ""){
+  if(defined $socket and ref($socket) ne "string"){
     $socket->{__send__}->($msg);
   };
 };
@@ -76,14 +76,14 @@ sub socket_send {
 sub socket_on_read {
   my $socket = shift;
   my $cb = shift;
-  if(defined $socket and $socket ne "") {
+  if(defined $socket and ref($socket) ne "string") {
     $socket->on_read($socket->{__on_read__}->($cb));
   };
 };
 
 sub socket_destroy {
   my $socket = shift;
-  if(defined $socket and $socket ne "") {
+  if(defined $socket and ref($socket) ne "string") {
     $socket->destroy;
   };
 };
