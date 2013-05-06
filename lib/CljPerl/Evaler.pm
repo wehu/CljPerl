@@ -184,6 +184,7 @@ package CljPerl::Evaler;
                   "begin"=>1,
                   "length"=>1,
                   "type"=>1,
+                  "perlobj-type"=>1,
                   "meta"=>1,
                   "apply"=>1,
                   append=>1,
@@ -880,6 +881,12 @@ package CljPerl::Evaler;
       $ast->error("type expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
       return CljPerl::Atom->new("string", $v->type());
+     # (perlobj-type obj)
+    } elsif($fn eq "perlobj-type") {
+      $ast->error("perlobj-type expects 1 argument") if $size != 2;
+      my $v = $self->_eval($ast->second());
+      $ast->error("perlobj-type expects a perlobject") if $v->type() ne "perlobject";
+      return CljPerl::Atom->new("string", ref($v->value()));
     # (apply fn list)
     } elsif($fn eq "apply") {
       $ast->error("apply expects 2 arguments") if $size != 3;
