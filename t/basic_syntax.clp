@@ -196,3 +196,5 @@
 (println ($ "[id=aa]" #[html "aaaa" #[a ^{:id "aa"} "a"]]
   (fn [xml]
     #[b "aaa"])))
+
+(println (object-id "aaa"))

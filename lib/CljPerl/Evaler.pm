@@ -183,6 +183,7 @@ package CljPerl::Evaler;
                   "while"=>1,
                   "begin"=>1,
                   "length"=>1,
+                  "object-id"=>1,
                   "type"=>1,
                   "perlobj-type"=>1,
                   "meta"=>1,
@@ -876,6 +877,11 @@ package CljPerl::Evaler;
       $ast->error("namespace-end expects 0 argument") if $size != 1;
       $self->pop_namespace();
       return $nil;
+    # (object-id obj)
+    } elsif($fn eq "object-id") {
+      $ast->error("object-id expects 1 argument") if $size != 2;
+      my $v = $self->_eval($ast->second());
+      return CljPerl::Atom->new("string", $v->object_id());
     # (type obj)
     } elsif($fn eq "type") {
       $ast->error("type expects 1 argument") if $size != 2;

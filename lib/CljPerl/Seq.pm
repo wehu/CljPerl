@@ -7,6 +7,7 @@ package CljPerl::Seq;
   use CljPerl::Printer;
 
   our $VERSION = '0.07';
+  our $id = 0;
 
   sub new {
     my $class = shift;
@@ -18,6 +19,7 @@ package CljPerl::Seq;
     my $self = {class=>"Seq",
 	        type=>$type,
                 value=>$value,
+                object_id=>"seq" . ($id++), 
                 meta=>undef,
                 pos=>{filename=>"unknown",
 		      line=>0,
@@ -39,6 +41,11 @@ package CljPerl::Seq;
     } else {
       return $self->{type};
     }
+  }
+
+  sub object_id {
+    my $self = shift;
+    return $self->{object_id};
   }
 
   sub meta {

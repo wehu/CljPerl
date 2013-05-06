@@ -7,6 +7,7 @@ package CljPerl::Atom;
   use CljPerl::Logger;
 
   our $VERSION = '0.07';
+  our $id = 0;
   
   sub new {
     my $class = shift;
@@ -16,6 +17,7 @@ package CljPerl::Atom;
     my $self = {class=>"Atom",
 	        type=>$type,
 	        value=>$value,
+                object_id=>"atom" . ($id++), 
                 meta=>undef,
 	        pos=>{filename=>"unknown",
 		      line=>0,
@@ -37,6 +39,11 @@ package CljPerl::Atom;
     } else {
       return $self->{type};
     }
+  }
+
+  sub object_id {
+    my $self = shift;
+    return $self->{object_id}; 
   }
 
   sub meta {
