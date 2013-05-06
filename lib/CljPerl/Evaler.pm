@@ -273,7 +273,7 @@ package CljPerl::Evaler;
       foreach my $i (@{$value}) {
         if($i->type() eq "dequotation" and $i->value() =~ /^@/){
           my $dl = $self->bind($i);
-          $i->error("~@ should be given a list") if $dl->type() ne "list";
+          $i->error("~@ should be given a list but got " . $dl->type()) if $dl->type() ne "list";
           foreach my $di (@{$dl->value()}){
             $list->append($di);
           };
@@ -307,7 +307,7 @@ package CljPerl::Evaler;
         my $m = $self->_eval($ast->second());
         my $mtype = $m->type();
         my $mvalue = $m->value();
-        $ast->error("key accessor expects a map or meta as the first arguments")
+        $ast->error("key accessor expects a map or meta as the first arguments but got " . $mtype)
            if $mtype ne "map" and $mtype ne "meta";
         if($size == 2) {
           #$ast->error("key " . $fvalue . " does not exist")
@@ -324,7 +324,7 @@ package CljPerl::Evaler;
         my $v = $self->_eval($ast->second());
         my $vtype = $v->type();
         my $vvalue = $v->value();
-        $ast->error("index accessor expects a vector or list or xml as the first arguments")
+        $ast->error("index accessor expects a vector or list or xml as the first arguments but got " . $vtype)
            if $vtype ne "vector" and $vtype ne "list"
               and $vtype ne "xml";
         $ast->error("index is bigger than size") if $fvalue >= scalar @{$vvalue};
@@ -434,12 +434,12 @@ package CljPerl::Evaler;
       } elsif($at eq "string" or $at eq "keyword") {
         $a->type("key accessor");
       } else {
-        $ast->error("unsupport type " . $at . " for accessor");
+        $ast->error("unsupport type " . $at . " for accessor but got " . $at);
       }
       return $a;
     } elsif($type eq "sender") {
       my $sn = $self->_eval($value);
-      $ast->error("sender expects a string or keyword")
+      $ast->error("sender expects a string or keyword but got " . $type)
         if $sn->type() ne "string"
            and $sn->type() ne "keyword";
       my $s = CljPerl::Atom->new("symbol", $sn->value());
@@ -465,7 +465,7 @@ package CljPerl::Evaler;
       $ast->error($type . " should have even number of items") if ($n%2) != 0;
       for(my $i=0; $i<$n; $i+=2) {
         my $k = $self->_eval($value->[$i]);
-        $ast->error($type . " expects keyword or string as key")
+        $ast->error($type . " expects keyword or string as key but got " . $k->type())
           if ($k->type() ne "keyword"
               and $k->type() ne "string");
         my $v = $self->_eval($value->[$i+1]);
@@ -483,7 +483,7 @@ package CljPerl::Evaler;
         $first = $self->_eval($first);
         $firsttype = $first->type();
       };
-      $ast->error("xml expects a symbol or string or keyword as name")
+      $ast->error("xml expects a symbol or string or keyword as name but got " . $firsttype)
         if $firsttype ne "symbol"
            and $firsttype ne "string"
            and $firsttype ne "keyword";
@@ -494,7 +494,7 @@ package CljPerl::Evaler;
       foreach my $i (@rest) {
         my $iv = $self->_eval($i);
         my $it = $iv->type();
-        $ast->error("xml expects string or xml or meta or list as items")
+        $ast->error("xml expects string or xml or meta or list as items but got " . $it)
           if $it ne "string"
              and $it ne "xml"
              and $it ne "meta"
@@ -526,7 +526,7 @@ package CljPerl::Evaler;
     if($fn eq "eval") {
       $ast->error("eval expects 1 argument") if $size != 2;
       my $s = $ast->second();
-      $ast->error("eval expects 1 string as argument") if $s->type() ne "string";
+      $ast->error("eval expects 1 string as argument but got " . $s->type()) if $s->type() ne "string";
       return $self->eval($s->value());
     } elsif($fn eq "syntax") {
       $ast->error("syntax expects 1 argument") if $size != 2;
@@ -535,7 +535,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "def") {
       $ast->error($fn . " expects 2 arguments") if $size > 4 or $size < 3;
       if($size == 3){
-        $ast->error($fn . " expects a symbol as the first argument") if $ast->second()->type() ne "symbol";
+        $ast->error($fn . " expects a symbol as the first argument but got " . $ast->second()->type()) if $ast->second()->type() ne "symbol";
         my $name = $ast->second()->value();
         $ast->error($name . " is a reserved word") if exists $builtin_funcs->{$name} or $name =~ /^(\.|->)\S+$/; 
         $self->new_var($name);
@@ -544,8 +544,8 @@ package CljPerl::Evaler;
         return $value;
       } else {
         my $meta = $self->_eval($ast->second());
-        $ast->error($fn . " expects a meta as the first argument") if $meta->type() ne "meta";
-        $ast->error($fn . " expects a symbol as the first argument") if $ast->third()->type() ne "symbol";
+        $ast->error($fn . " expects a meta as the first argument but got " . $meta->type()) if $meta->type() ne "meta";
+        $ast->error($fn . " expects a symbol as the first argument but got " . $ast->third()->type()) if $ast->third()->type() ne "symbol";
         my $name = $ast->third()->value();
         $ast->error($name . " is a reserved word") if exists $builtin_funcs->{$name} or $name =~ /^(\.|->)\S+$/;
         $self->new_var($name);
@@ -557,7 +557,7 @@ package CljPerl::Evaler;
     # (set! name value)
     } elsif($fn eq "set!") {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
-      $ast->error($fn . " expects a symbol as the first argument") if $ast->second()->type() ne "symbol";
+      $ast->error($fn . " expects a symbol as the first argument but got " . $ast->second()->type()) if $ast->second()->type() ne "symbol";
       my $name = $ast->second()->value();
       $ast->error("undefine variable " . $name) if !defined $self->var($name);
       my $value = $self->_eval($ast->third());
@@ -574,7 +574,7 @@ package CljPerl::Evaler;
       for(my $i=0; $i < $varssize; $i+=2) {
         my $n = $varvs->[$i];
         my $v = $varvs->[$i+1];
-        $ast->error($fn . " expects a symbol as name") if $n->type() ne "symbol";
+        $ast->error($fn . " expects a symbol as name but got " . $n->type()) if $n->type() ne "symbol";
         $self->new_var($n->value(), $self->_eval($v));
       };
       my @body = $ast->slice(2 .. $size-1);
@@ -594,7 +594,7 @@ package CljPerl::Evaler;
       my $argssize = $args->size();
       my $i = 0;
       foreach my $arg (@{$argsvalue}) {
-        $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
+        $arg->error("formal argument should be a symbol but got " . $arg->type()) if $arg->type() ne "symbol";
         if($arg->value() eq "&"
            and ($argssize != $i + 2 or $argsvalue->[$i+1]->value() eq "&")) {
           $arg->error("only 1 non-& should follow &");
@@ -615,7 +615,7 @@ package CljPerl::Evaler;
       $ast->error("defmacro expect [arg ...] as formal argument list") if $args->type() ne "vector";
       my $i = 0;
       foreach my $arg (@{$args->value()}) {
-        $arg->error("formal argument should be a symbol") if $arg->type() ne "symbol";
+        $arg->error("formal argument should be a symbol but got " . $arg->type()) if $arg->type() ne "symbol";
         if($arg->value() eq "&"
            and ($args->size() != $i + 2 or $args->value()->[$i+1]->value() eq "&")) {
           $arg->error("only 1 non-& should follow &");
@@ -648,14 +648,14 @@ package CljPerl::Evaler;
       if($m->type() eq "symbol" or $m->type() eq "keyword") {
       } else {
         $m = $self->_eval($m);
-        $ast->error("require expects a string")
+        $ast->error("require expects a string but got " . $m->type())
           if $m->type() ne "string";
       };
       return $self->load($m->value());
     } elsif($fn eq "read") {
       $ast->error("read expects 1 argument") if $size != 2;
       my $f = $self->_eval($ast->second());
-      $ast->error("read expects a string")
+      $ast->error("read expects a string but got " . $f->type())
         if $f->type() ne "string";
       return $self->read($f->value());
     # (list 'a 'b 'c)
@@ -671,14 +671,14 @@ package CljPerl::Evaler;
     } elsif($fn eq "car") {
       $ast->error("car expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("car expects 1 list as argument") if $v->type() ne "list";
+      $ast->error("car expects 1 list as argument but got " . $v->type()) if $v->type() ne "list";
       my $fv = $v->first();
       return $fv;
     # (cdr list)
     } elsif($fn eq "cdr") {
       $ast->error("cdr expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("cdr expects 1 list as argument") if $v->type() ne "list";
+      $ast->error("cdr expects 1 list as argument but got " . $v->type()) if $v->type() ne "list";
       return $empty_list if($v->size()==0);
       my @vs = $v->slice(1 .. $v->size()-1);
       my $r = CljPerl::Seq->new("list");
@@ -689,7 +689,7 @@ package CljPerl::Evaler;
       $ast->error("cons expects 2 arguments") if $size != 3;
       my $fv = $self->_eval($ast->second());
       my $rvs = $self->_eval($ast->third());
-      $ast->error("cons expects 1 list as the second argument") if $rvs->type() ne "list";
+      $ast->error("cons expects 1 list as the second argument but got " . $rvs->type()) if $rvs->type() ne "list";
       my @vs = ();
       @vs = $rvs->slice(0 .. $rvs->size()-1) if $rvs->size() > 0;
       unshift @vs, $fv;
@@ -700,7 +700,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "if") {
       $ast->error("if expects 2 or 3 arguments") if $size > 4 or $size < 3;
       my $cond = $self->_eval($ast->second());
-      $ast->error("if expects a bool as the first argument") if $cond->type() ne "bool";
+      $ast->error("if expects a bool as the first argument but got " . $cond->type()) if $cond->type() ne "bool";
       if($cond->value() eq "true") {
         return $self->_eval($ast->third());
       } elsif($ast->size() == 4) {
@@ -712,7 +712,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "while") {
       $ast->error("while expects >= 2 arguments") if $size < 3;
       my $cond = $self->_eval($ast->second());
-      $ast->error("while expects a bool as the first argument") if $cond->type() ne "bool";
+      $ast->error("while expects a bool as the first argument but got " . $cond->type()) if $cond->type() ne "bool";
       my $res = $nil;
       my @body = $ast->slice(2 .. $size-1);
       while ($cond->value() eq "true") {
@@ -736,7 +736,8 @@ package CljPerl::Evaler;
       $ast->error($fn . " expects 2 arguments") if $size != 3;
       my $v1 = $self->_eval($ast->second());
       my $v2 = $self->_eval($ast->third());
-      $ast->error($fn . " expects number as arguments") if $v1->type() ne "number" or $v2->type() ne "number";
+      $ast->error($fn . " expects number as arguments but got " . $v1->type() . " and " . $v2->type())
+        if $v1->type() ne "number" or $v2->type() ne "number";
       my $vv1 = $v1->value();
       my $vv2 = $v2->value();
       my $r = CljPerl::Atom->new("number", eval("$vv1 $fn $vv2"));
@@ -746,7 +747,8 @@ package CljPerl::Evaler;
       $ast->error($fn . " expects 2 arguments") if $size != 3;
       my $v1 = $self->_eval($ast->second());
       my $v2 = $self->_eval($ast->third());
-      $ast->error($fn . " expects number as arguments") if $v1->type() ne "number" or $v2->type() ne "number";
+      $ast->error($fn . " expects number as arguments but got " . $v1->type() . " and " . $v2->type())
+        if $v1->type() ne "number" or $v2->type() ne "number";
       my $vv1 = $v1->value();
       my $vv2 = $v2->value();
       my $r = eval("$vv1 $fn $vv2");
@@ -758,14 +760,15 @@ package CljPerl::Evaler;
     } elsif($fn eq "xml-name") {
       $ast->error($fn . " expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error($fn . " expects xml as argument") if $v->type() ne "xml"; 
+      $ast->error($fn . " expects xml as argument but got " . $v->type()) if $v->type() ne "xml"; 
       return CljPerl::Atom->new("string", $v->{name}); 
     # eq ne for string comparing
     } elsif($fn =~ /^(eq|ne)$/) {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
       my $v1 = $self->_eval($ast->second());
       my $v2 = $self->_eval($ast->third());
-      $ast->error($fn . " expects string as arguments") if $v1->type() ne "string" or $v2->type() ne "string";
+      $ast->error($fn . " expects string as arguments but got " . $v1->type() . " and " . $v2->type())
+        if $v1->type() ne "string" or $v2->type() ne "string";
       my $vv1 = $v1->value();
       my $vv2 = $v2->value();
       my $r = eval("'$vv1' $fn '$vv2'");
@@ -802,7 +805,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "!" or $fn eq "not") {
       $ast->error("!/not expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("!/not expects a bool as the first argument") if $v->type() ne "bool";
+      $ast->error("!/not expects a bool as the first argument but got " . $v->type()) if $v->type() ne "bool";
       if($v->value() eq "true") {
         return $false;
       } else {
@@ -812,11 +815,11 @@ package CljPerl::Evaler;
     } elsif($fn eq "and") {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
       my $v1 = $self->_eval($ast->second());
-      $ast->error($fn . " expects bool as arguments")
+      $ast->error($fn . " expects bool as arguments but got " . $v1->type())
         if $v1->type() ne "bool";
       return $false if $v1->value() eq "false";
       my $v2 = $self->_eval($ast->third());
-      $ast->error($fn . " expects bool as arguments")
+      $ast->error($fn . " expects bool as arguments but got " . $v2->type())
         if $v2->type() ne "bool";
       if($v2->value() eq "true") {
         return $true;
@@ -826,11 +829,11 @@ package CljPerl::Evaler;
     } elsif($fn eq "or") {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
       my $v1 = $self->_eval($ast->second());
-      $ast->error($fn . " expects bool as arguments")
+      $ast->error($fn . " expects bool as arguments but got " . $v1->type())
         if $v1->type() ne "bool";
       return $true if $v1->value() eq "true";
       my $v2 = $self->_eval($ast->third());
-      $ast->error($fn . " expects bool as arguments")
+      $ast->error($fn . " expects bool as arguments but got " . $v2->type())
         if $v2->type() ne "bool";
       if($v2->value() eq "true") { 
         return $true;
@@ -859,7 +862,7 @@ package CljPerl::Evaler;
       my $v2 = $self->_eval($ast->third());
       my $v1type = $v1->type();
       my $v2type = $v2->type();
-      $ast->error("append expects string or list or vector as arguments")
+      $ast->error("append expects string or list or vector as arguments but got " . $v1type . " and " . $v2type)
        if (($v1type ne $v2type)
            or ($v1type ne "string"
                and $v1type ne "list"
@@ -884,7 +887,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "keys") {
       $ast->error("keys expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("keys expects map as arguments") if $v->type() ne "map";
+      $ast->error("keys expects map as arguments but got " . $v->type()) if $v->type() ne "map";
       my @r = ();
       foreach my $k (keys %{$v->value()}) {
         push @r, CljPerl::Atom->new("keyword", $k);
@@ -897,7 +900,7 @@ package CljPerl::Evaler;
       if($v->type() eq "symbol" or $v->type() eq "keyword") {
       } else {
         $v = $self->_eval($v);
-        $ast->error("namespace-begin expects string as argument")
+        $ast->error("namespace-begin expects string as argument but got " . $v->type())
           if $v->type() ne "string";
       };
       $self->push_namespace($v->value());
@@ -921,17 +924,20 @@ package CljPerl::Evaler;
     } elsif($fn eq "perlobj-type") {
       $ast->error("perlobj-type expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("perlobj-type expects a perlobject") if $v->type() ne "perlobject";
-      return CljPerl::Atom->new("string", ref($v->value()));
+      if($v->type() eq "perlobject") {
+        return CljPerl::Atom->new("string", ref($v->value()));
+      } else {
+        return $nil;
+      };
     # (apply fn list)
     } elsif($fn eq "apply") {
       $ast->error("apply expects 2 arguments") if $size != 3;
       my $f = $self->_eval($ast->second());
-      $ast->error("apply expects function as the first argument")
+      $ast->error("apply expects function as the first argument but got " . $f->type())
         if ($f->type() ne "function"
             and !($f->type() eq "symbol" and exists $builtin_funcs->{$f->value()}));
       my $l = $self->_eval($ast->third());
-      $ast->error("apply expects list as the first argument") if $l->type() ne "list";
+      $ast->error("apply expects list as the first argument but got " . $l->type()) if $l->type() ne "list";
       my $n = CljPerl::Seq->new("list");
       $n->append($f);
       foreach my $i (@{$l->value()}) {
@@ -944,7 +950,7 @@ package CljPerl::Evaler;
       my $v = $self->_eval($ast->second());
       if($size == 3){
         my $vm = $self->_eval($ast->third());
-        $ast->error("meta expects 1 meta data as the second arguments") if $vm->type() ne "meta";
+        $ast->error("meta expects 1 meta data as the second arguments but got " . $vm->type()) if $vm->type() ne "meta";
         $v->meta($vm);
       }
       my $m = $v->meta();
@@ -959,7 +965,7 @@ package CljPerl::Evaler;
       my $blessed = $1;
       my $ns = $2;
       $ast->error(". expects > 1 arguments") if $size < 2;
-      $ast->error(". expects a symbol or keyword or stirng as the first argument")
+      $ast->error(". expects a symbol or keyword or stirng as the first argument but got " . $ast->second()->type())
         if ($ast->second()->type() ne "symbol"
             and $ast->second()->type() ne "keyword"
             and $ast->second()->type() ne "string");
@@ -971,7 +977,7 @@ package CljPerl::Evaler;
         } elsif($m->type() eq "string") {
           $m = $self->_eval($ast->third());
         } else {
-          $ast->error(". require expects a string");
+          $ast->error(". require expects a string but got " . $m->type());
         };
         my $mn = $m->value();
         $mn =~ s/::/\//g;
@@ -1001,7 +1007,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "perl->clj") {
       $ast->error("perl->clj expects 1 argument") if $size != 2;
       my $o = $self->_eval($ast->second());
-      $ast->error("perl->clj expects perlobject as argument") if $o->type() ne "perlobject";
+      $ast->error("perl->clj expects perlobject as argument but got " . $o->type()) if $o->type() ne "perlobject";
       return &perl2clj($o->value());
     # (println obj)
     } elsif($fn eq "println") {
@@ -1027,16 +1033,16 @@ package CljPerl::Evaler;
     if(defined $meta) {
       if(exists $meta->value()->{"return"}) {
         my $rt = $meta->value()->{"return"};
-        $ast->error("return expects a string or keyword")
+        $ast->error("return expects a string or keyword but got " . $rt->type())
           if $rt->type() ne "string"
              and $rt->type() ne "keyword";
         $ret_type = $rt->value();
       };
       if(exists $meta->value()->{"arguments"}) {
         my $ats = $meta->value()->{"arguments"};
-        $ast->error("arguments expect a vector") if $ats->type() ne "vector";
+        $ast->error("arguments expect a vector but got " . $ats->type()) if $ats->type() ne "vector";
         foreach my $arg (@{$ats->value()}) {
-          $ast->error("arguments expect a vector of string or keyword")
+          $ast->error("arguments expect a vector of string or keyword but got " . $arg->type())
             if $arg->type() ne "string"
                and $arg->type() ne "keyword";
           push @fargtypes, $arg->value();
