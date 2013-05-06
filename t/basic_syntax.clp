@@ -198,3 +198,13 @@
     #[b "aaa"])))
 
 (println (object-id "aaa"))
+
+(println (gen-sym "sym"))
+
+
+(defmacro test-gen-sym []
+  (let [s (gen-sym)]
+    `(let [~s "aa"]
+       (println ~s))))
+
+(test-gen-sym)

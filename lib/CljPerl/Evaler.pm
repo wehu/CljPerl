@@ -175,6 +175,7 @@ package CljPerl::Evaler;
                   let=>1,
                   fn=>1,
 		  defmacro=>1,
+                  "gen-sym"=>1,
                   list=>1,
                   car=>1,
                   cdr=>1,
@@ -608,7 +609,7 @@ package CljPerl::Evaler;
       return $nast;
     # (defmacro name [args ...] body)
     } elsif($fn eq "defmacro") {
-      $ast->error("defmacro expects >= 4 arguments") if $ast->size() < 4;
+      $ast->error("defmacro expects >= 4 arguments") if $size < 4;
       my $name = $ast->second()->value();
       my $args = $ast->third();
       $ast->error("defmacro expect [arg ...] as formal argument list") if $args->type() ne "vector";
@@ -628,6 +629,18 @@ package CljPerl::Evaler;
       $nast->{context} = \%c;
       $self->new_var($name, $nast);
       return $nast;
+    # (gen-sym)
+    } elsif($fn eq "gen-sym") {
+      $ast->error("gen-sym expects 0/1 argument") if $size > 2;
+      my $s = CljPerl::Atom->new("symbol");
+      if($size == 2) {
+        my $pre = $self->_eval($ast->second());
+        $ast->("gen-sym expects string as argument") if $pre->type ne "string"; 
+        $s->value($pre->value() . $s->object_id()); 
+      } else {
+        $s->value($s->object_id());
+      }; 
+      return $s;
     # (require "filename")
     } elsif($fn eq "require") {
       $ast->error("require expects 1 argument") if $size != 2;
