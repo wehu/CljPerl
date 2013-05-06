@@ -27,7 +27,7 @@ sub socket_server {
         $hdl->on_error(
             sub {
               my ($hdl, $fatal, $message) = @_;
-              print "$message\n";
+              #print "$message\n";
               $hdl->destroy;
             }
         );
