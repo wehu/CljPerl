@@ -17,3 +17,6 @@ Revision history for Perl extension CljPerl.
 	- Add regexp match form.
 0.06  Sat May 04 02:24:00 2013
 	- quoi web framework.
+0.07  Mon May 06 10:42:00 2013
+	- Add bin/cljp into Makefile.PL.
+	- Some bug fixes.

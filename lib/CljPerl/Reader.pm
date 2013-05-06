@@ -6,7 +6,7 @@ package CljPerl::Reader;
   use CljPerl::Atom;
   use CljPerl::Logger;
 
-  our $VERSION = '0.06';
+  our $VERSION = '0.07';
 
   sub new {
     my $class = shift;

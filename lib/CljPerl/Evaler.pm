@@ -8,7 +8,7 @@ package CljPerl::Evaler;
   use File::Spec;
   use File::Basename;
 
-  our $VERSION = '0.06';
+  our $VERSION = '0.07';
 
   our $namespace_key = "0namespace0";
 

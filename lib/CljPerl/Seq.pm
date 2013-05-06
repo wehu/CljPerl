@@ -6,7 +6,7 @@ package CljPerl::Seq;
   use CljPerl::Logger;
   use CljPerl::Printer;
 
-  our $VERSION = '0.06';
+  our $VERSION = '0.07';
 
   sub new {
     my $class = shift;
