@@ -21,4 +21,7 @@ Revision history for Perl extension CljPerl.
 	- Add bin/cljp into Makefile.PL.
 	- Some bug fixes.
 0.08  Mon May 06 12:28:00 2013 
-	- Add perlobj-type and object-id
+	- Add perlobj-type and object-id. 
+0.09  Mon May 06 14:33:00 2013
+	- Refine error report.
+	- Set key of map with nil to delete key. 

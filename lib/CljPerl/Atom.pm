@@ -6,7 +6,7 @@ package CljPerl::Atom;
   use CljPerl::Printer;
   use CljPerl::Logger;
 
-  our $VERSION = '0.08';
+  our $VERSION = '0.09';
   our $id = 0;
   
   sub new {
