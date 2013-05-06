@@ -195,6 +195,7 @@ package CljPerl::Evaler;
                   "perl->clj"=>1,
                   "clj->string"=>1,
                   "!"=>1,
+                  "not"=>1,
                   "+"=>1,
                   "-"=>1,
                   "*"=>1,
@@ -785,24 +786,40 @@ package CljPerl::Evaler;
         return $false;
       };
     # (! true_or_false)
-    } elsif($fn eq "!") {
-      $ast->error("! expects 1 argument") if $size != 2;
+    } elsif($fn eq "!" or $fn eq "not") {
+      $ast->error("!/not expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("! expects a bool as the first argument") if $v->type() ne "bool";
+      $ast->error("!/not expects a bool as the first argument") if $v->type() ne "bool";
       if($v->value() eq "true") {
         return $false;
       } else {
         return $true;
       };
     # (and/or true_or_false true_or_false)
-    } elsif($fn eq "and" or $fn eq "or") {
+    } elsif($fn eq "and") {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
       my $v1 = $self->_eval($ast->second());
+      $ast->error($fn . " expects bool as arguments")
+        if $v1->type() ne "bool";
+      return $false if $v1->value() eq "false";
       my $v2 = $self->_eval($ast->third());
       $ast->error($fn . " expects bool as arguments")
-        if $v1->type() ne "bool" or $v2->type() ne "bool";
-      if(($fn eq "and" and $v1->value() eq "true" and $v2->value() eq "true")
-         or ($fn eq "or" and ($v1->value() eq "true" or $v2->value() eq "true"))) {
+        if $v2->type() ne "bool";
+      if($v2->value() eq "true") {
+        return $true;
+      } else {
+        return $false;
+      };
+    } elsif($fn eq "or") {
+      $ast->error($fn . " expects 2 arguments") if $size != 3;
+      my $v1 = $self->_eval($ast->second());
+      $ast->error($fn . " expects bool as arguments")
+        if $v1->type() ne "bool";
+      return $true if $v1->value() eq "true";
+      my $v2 = $self->_eval($ast->third());
+      $ast->error($fn . " expects bool as arguments")
+        if $v2->type() ne "bool";
+      if($v2->value() eq "true") { 
         return $true;
       } else {
         return $false;
