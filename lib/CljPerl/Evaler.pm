@@ -314,8 +314,14 @@ package CljPerl::Evaler;
           return $nil  if ! exists $mvalue->{$fvalue};
           return $mvalue->{$fvalue};
         } elsif($size == 3) {
-          $mvalue->{$fvalue} = $self->_eval($ast->third());
-          return $mvalue->{$fvalue};
+          my $v = $self->_eval($ast->third()); 
+          if($v->type() eq "nil"){
+            delete $mvalue->{$fvalue};
+            return $nil;
+          } else {
+            $mvalue->{$fvalue} = $v;
+            return $mvalue->{$fvalue};
+          };
         } else {
           $ast->error("key accessor expects <= 2 arguments");
         }
@@ -924,11 +930,8 @@ package CljPerl::Evaler;
     } elsif($fn eq "perlobj-type") {
       $ast->error("perlobj-type expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      if($v->type() eq "perlobject") {
-        return CljPerl::Atom->new("string", ref($v->value()));
-      } else {
-        return $nil;
-      };
+      $ast->error("perlobj-type expects perlobject as argument but got " . $v->type()) if($v->type() ne "perlobject");
+      return CljPerl::Atom->new("string", ref($v->value()));
     # (apply fn list)
     } elsif($fn eq "apply") {
       $ast->error("apply expects 2 arguments") if $size != 3;
