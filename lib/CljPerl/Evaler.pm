@@ -591,7 +591,12 @@ package CljPerl::Evaler;
       };
       if($@){
 	my $e = $self->{exception};
-	$ast->error("catch got a undefined") if !defined $e;
+	if(!defined $e) {
+          $e = CljPerl::Atom->new("exception", "unkown expection");
+	  $e->{label} = "undef";
+	  my @ec = ();
+	  $e->{caller} = \@ec;
+        };
 	$ast->error("catch expects an exception for handler but got " . $e->type()) if $e->type() ne "exception";
 	my $i = $self->caller_size();
 	for(;$i > $saved_caller_depth; $i--){
@@ -599,7 +604,7 @@ package CljPerl::Evaler;
 	};
 	my $call_handler = CljPerl::Seq->new("list");
 	$call_handler->append($handler);
-	$call_handler->append($self->{exception});
+	$call_handler->append($e);
 	$self->{exception} = undef;
 	return $self->_eval($call_handler);
       };
