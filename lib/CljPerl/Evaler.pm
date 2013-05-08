@@ -58,12 +58,12 @@ package CljPerl::Evaler;
   sub push_caller {
     my $self = shift;
     my $ast  = shift;
-    push @{$self->{caller}}, $ast;
+    unshift @{$self->{caller}}, $ast;
   }
 
   sub pop_caller {
     my $self = shift;
-    pop @{$self->{caller}};
+    shift @{$self->{caller}};
   }
 
   sub caller_size {
