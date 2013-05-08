@@ -68,3 +68,8 @@
            ~i)))
     `()
     (reverse pairs)))
+
+; env
+(defn env [n]
+  (. get_env n))
+

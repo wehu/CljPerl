@@ -88,6 +88,11 @@ sub match {
   return \@m;
 }
 
+sub get_env {
+  my $name = shift;
+  return $ENV{$name};
+}
+
 1;
 __END__
 

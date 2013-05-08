@@ -226,3 +226,4 @@
   [true (println "a")]
   [else (println "b")])
 
+(println (env "PATH"))
