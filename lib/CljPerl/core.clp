@@ -56,3 +56,15 @@
 (defn match [regexp str]
   (perl->clj (. match regexp str)))
 
+; cond
+(defmacro cond [ & pairs]
+  (reduce
+    (fn [p i]
+      (let [k (#:0 (syntax p))
+            k (if (equal k `else) `true k)
+            v (#:1 (syntax p))]
+        `(if ~k
+           ~v
+           ~i)))
+    `()
+    (reverse pairs)))

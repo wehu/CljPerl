@@ -200,6 +200,7 @@ package CljPerl::Evaler;
                   "while"=>1,
                   "begin"=>1,
                   "length"=>1,
+		  "reverse"=>1,
                   "object-id"=>1,
                   "type"=>1,
                   "perlobj-type"=>1,
@@ -914,7 +915,7 @@ package CljPerl::Evaler;
       } else {
         return $false;
       };
-    # (length list_or_vector_or_xml_map_or_string)
+    # (length list_or_vector_or_xml_or_map_or_string)
     } elsif($fn eq "length") {
       $ast->error("length expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
@@ -927,6 +928,26 @@ package CljPerl::Evaler;
         $r->value(scalar %{$v->value()});
       } else {
         $ast->error("unexpected type " . $v->type() . " of argument for length");
+      };
+      return $r;
+    # (reverse list_or_vector_or_xml_or_string)
+    } elsif($fn eq "reverse") {
+      $ast->error("length expects 1 argument") if $size != 2;
+      my $v = $self->_eval($ast->second());
+      my $r;
+      if($v->type() eq "string"){
+	$r = CljPerl::Atom->new("string", 0);
+        $r->value(reverse($v->value()));
+      } elsif($v->type() eq "list") {
+        $r = CljPerl::Seq->new("list");
+	my @vv = reverse @{$v->value()};
+        $r->value(\@vv);
+      } elsif($v->type() eq "vector" or $v->type() eq "xml"){
+	$r = CljPerl::Atom->new($v->type());
+	my @vv = reverse @{$v->value()};
+        $r->value(\@vv);
+      } else {
+        $ast->error("unexpected type " . $v->type() . " of argument for reverse");
       };
       return $r;
     # (append list1 list2)

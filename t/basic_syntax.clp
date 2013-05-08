@@ -222,3 +222,7 @@
   (fn [e]
     (println e)))))
 
+(cond
+  [true (println "a")]
+  [else (println "b")])
+
