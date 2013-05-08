@@ -17,10 +17,13 @@ package CljPerl::Evaler;
     my @default_namespace = ();
     my @scopes = ({$namespace_key=>\@default_namespace});
     my @file_stack = ();
+    my @caller = ();
     my $self = {class=>$class,
                 scopes=>\@scopes,
                 loaded_files=>{},
                 file_stack=>\@file_stack,
+	        caller=>\@caller,
+	        exception=>undef,
                 quotation_scope=>0,
                 syntaxquotation_scope=>0};
     bless $self;
@@ -50,6 +53,22 @@ package CljPerl::Evaler;
     my $self = shift;
     my $scope = @{$self->scopes()}[0];
     return $scope;
+  }
+
+  sub push_caller {
+    my $self = shift;
+    my $ast  = shift;
+    push @{$self->{caller}}, $ast;
+  }
+
+  sub pop_caller {
+    my $self = shift;
+    pop @{$self->{caller}};
+  }
+
+  sub caller_size {
+    my $self = shift;
+    scalar @{$self->{caller}};
   }
 
   sub push_namespace {
@@ -145,15 +164,8 @@ package CljPerl::Evaler;
     my $file = shift;
     my $reader = CljPerl::Reader->new();
     $reader->read_file($file);
-    #my $scopes_size = scalar @{$self->{scopes}};
-    #my @backup_scopes = @{$self->{scopes}}[0 .. $scopes_size-2];
-    #my @nss = ($self->{scopes}->[$scopes_size-1]);
-    #$self->{scopes} = \@nss;
     my $res = undef;
     $reader->ast()->each(sub {$res = $self->_eval($_[0])});
-    #$scopes_size = scalar @{$self->{scopes}};
-    #$self->{scopes} = \@backup_scopes;
-    #push @{$self->{scopes}}, $self->{scopes}->[$scopes_size-1];
     return $res;
   }
 
@@ -170,6 +182,10 @@ package CljPerl::Evaler;
   our $builtin_funcs = {
                   "eval"=>1,
                   syntax=>1,
+		  "catch"=>1,
+		  "exception-label"=>1,
+		  "exception-message"=>1,
+		  "throw"=>1,
                   def=>1,
                   "set!"=>1,
                   let=>1,
@@ -352,6 +368,7 @@ package CljPerl::Evaler;
           push @rrargs, $self->_eval($arg);
         };
 	$self->push_scope($scope);
+	$self->push_caller($ast);
         my $rest_args = undef;
         my $i = 0;
         my $fargsvalue = $fargs->value();
@@ -383,6 +400,7 @@ package CljPerl::Evaler;
           $res = $self->_eval($b);
 	};
 	$self->pop_scope();
+	$self->pop_caller();
 	return $res;
       } elsif($ftype eq "perlfunction") {
         my $meta = undef;
@@ -396,6 +414,7 @@ package CljPerl::Evaler;
         my $fargs = $fn->third();
 	my @rargs = $ast->slice(1 .. $ast->size()-1);
 	$self->push_scope($scope);
+	$self->push_caller($ast);
         my $rest_args = undef;
         my $i = 0;
         my $fargsvalue = $fargs->value();
@@ -427,6 +446,7 @@ package CljPerl::Evaler;
           $res = $self->_eval($b);
 	};
 	$self->pop_scope();
+	$self->pop_caller();
 	return $self->_eval($res);
       } else {
         $ast->error("expect a function or function name or index/key accessor");
@@ -537,6 +557,52 @@ package CljPerl::Evaler;
     } elsif($fn eq "syntax") {
       $ast->error("syntax expects 1 argument") if $size != 2;
       return $self->bind($ast->second());
+    } elsif($fn eq "throw") {
+      $ast->error("throw expects 2 arguments") if $size != 3;
+      my $label = $ast->second();
+      $ast->error("throw expects a symbol as the first argument but got " . $label->type()) if $label->type() ne "symbol";
+      my $msg = $self->_eval($ast->third());
+      $ast->error("throw expects a string as the second argument but got " . $msg->type()) if $msg->type() ne "string";
+      my $e = CljPerl::Atom->new("exception", $msg->value());
+      $e->{label} = $label->value();
+      my @caller = @{$self->{caller}};
+      $e->{caller} = \@caller;
+      $self->{exception} = $e;
+      die $msg->value();
+    } elsif($fn eq "exception-label") {
+      $ast->error("exception-label expects 1 argument") if $size != 2;
+      my $e = $self->_eval($ast->second());
+      $ast->error("exception-label expects an exception as argument but got " . $e->type()) if $e->type() ne "exception";
+      return CljPerl::Atom->new("string", $e->{label});
+    } elsif($fn eq "exception-message") {
+      $ast->error("exception-message expects 1 argument") if $size != 2;
+      my $e = $self->_eval($ast->second());
+      $ast->error("exception-message expects an exception as argument but got " . $e->type()) if $e->type() ne "exception";
+      return CljPerl::Atom->new("string", $e->value());
+    } elsif($fn eq "catch") {
+      $ast->error("catch expects 2 arguments") if $size != 3;
+      my $handler = $self->_eval($ast->third());
+       $ast->error("catch expects a function/lambda as the second argument but got " . $handler->type()) if $handler->type() ne "function";
+      my $res;
+      my $saved_caller_depth = $self->caller_size();
+      eval {
+	$res = $self->_eval($ast->second());
+      };
+      if($@){
+	my $e = $self->{exception};
+	$ast->error("catch got a undefined") if !defined $e;
+	$ast->error("catch expects an exception for handler but got " . $e->type()) if $e->type() ne "exception";
+	my $i = $self->caller_size();
+	for(;$i > $saved_caller_depth; $i--){
+          $self->pop_caller();
+	};
+	my $call_handler = CljPerl::Seq->new("list");
+	$call_handler->append($handler);
+	$call_handler->append($self->{exception});
+	$self->{exception} = undef;
+	return $self->_eval($call_handler);
+      };
+      return $res;
     # (def ^{} name value)
     } elsif($fn eq "def") {
       $ast->error($fn . " expects 2 arguments") if $size > 4 or $size < 3;
@@ -577,6 +643,7 @@ package CljPerl::Evaler;
       $ast->error($fn . " expects [name value ...] pairs as the first argument") if $varssize%2 != 0;
       my $varvs = $vars->value();
       $self->push_scope($self->current_scope());
+      $self->push_caller($ast);
       for(my $i=0; $i < $varssize; $i+=2) {
         my $n = $varvs->[$i];
         my $v = $varvs->[$i+1];
@@ -588,7 +655,8 @@ package CljPerl::Evaler;
       foreach my $b (@body){
         $res = $self->_eval($b);
       };
-      $self->pop_scope(); 
+      $self->pop_scope();
+      $self->pop_caller();
       return $res;
     # (fn [args ...] body)
     } elsif($fn eq "fn") {

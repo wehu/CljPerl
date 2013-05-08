@@ -25,3 +25,5 @@ Revision history for Perl extension CljPerl.
 0.09  Mon May 06 14:33:00 2013
 	- Refine error report.
 	- Set key of map with nil to delete key. 
+0.10  TBD
+	- Add exception throw/catch.

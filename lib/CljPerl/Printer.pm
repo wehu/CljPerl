@@ -61,6 +61,18 @@ package CljPerl::Printer;
         $s .= "</" . $obj->{name} . ">";
       } elsif($type eq "function" or $type eq "macro") {
         $s = to_string($obj->value());
+      } elsif($type eq "exception") {
+	$s = "exception: ";
+	$s .= $obj->{label} . " - ";
+       	$s .= $obj->value();
+	foreach my $c (@{$obj->{caller}}){
+          $s .= "\n\t" . to_string($c);
+	  $s .= "[";
+	  $s .= "file:" . $c->{pos}->{filename} . "; ";
+	  $s .= "line:" . $c->{pos}->{line} . "; ";
+	  $s .= "col:" . $c->{pos}->{col} . ";";
+	  $s .= "]";
+	};
       } else {
         $s = $obj->value();
       };

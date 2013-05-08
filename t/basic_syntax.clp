@@ -208,3 +208,17 @@
        (println ~s))))
 
 (test-gen-sym)
+
+(
+(fn []
+(catch (throw aaa "bbb") (fn [e] (println e)
+(println (exception-label e))
+(println (exception-message e))))))
+
+((fn []
+ (catch
+  ((fn []
+     (throw aaa "bbb")))
+  (fn [e]
+    (println e)))))
+
