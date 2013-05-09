@@ -173,4 +173,8 @@ Quoi is a simple web framework by CljPerl.
 	  (fn [xml]
 	    #[span "bar"])) ; <html>hello<span>bar</bar></html>
 
-		
+#### Quoi demo
+
+ * A web server hosted on OpenShift: [quoi-wehu.rhcloud.com](http://quoi-wehu.rhcloud.com)
+ * Source code: [quoi](https://github.com/wehu/quoi)
+
