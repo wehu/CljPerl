@@ -1124,7 +1124,7 @@ package CljPerl::Evaler;
     } elsif($fn eq "coro") {
       $ast->error("coro expects 1 argument") if $size != 2;
       my $b = $self->_eval($ast->second());
-      $ast->error("core expects a function as argument but got " . $b->type()) if $b->type() ne "function";
+      $ast->error("coro expects a function as argument but got " . $b->type()) if $b->type() ne "function";
       my $coro = new Coro sub {
         my $evaler = CljPerl::Evaler->new();
         my $fc = CljPerl::Seq->new("list");
