@@ -3,7 +3,7 @@ package CljPerl::Printer;
   use strict;
   use warnings;
 
-  our $VERSION = '0.09';
+  our $VERSION = '0.10';
 
   sub to_string {
     my $obj = shift;

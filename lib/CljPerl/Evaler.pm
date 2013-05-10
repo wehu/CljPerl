@@ -7,8 +7,9 @@ package CljPerl::Evaler;
   use CljPerl::Printer;
   use File::Spec;
   use File::Basename;
+  use Coro;
 
-  our $VERSION = '0.09';
+  our $VERSION = '0.10';
 
   our $namespace_key = "0namespace0";
 
@@ -181,21 +182,21 @@ package CljPerl::Evaler;
 
   our $builtin_funcs = {
                   "eval"=>1,
-                  syntax=>1,
+                  "syntax"=>1,
 		  "catch"=>1,
 		  "exception-label"=>1,
 		  "exception-message"=>1,
 		  "throw"=>1,
-                  def=>1,
+                  "def"=>1,
                   "set!"=>1,
-                  let=>1,
-                  fn=>1,
-		  defmacro=>1,
+                  "let"=>1,
+                  "fn"=>1,
+		  "defmacro"=>1,
                   "gen-sym"=>1,
-                  list=>1,
-                  car=>1,
-                  cdr=>1,
-                  cons=>1,
+                  "list"=>1,
+                  "car"=>1,
+                  "cdr"=>1,
+                  "cons"=>1,
                   "if"=>1,
                   "while"=>1,
                   "begin"=>1,
@@ -206,7 +207,7 @@ package CljPerl::Evaler;
                   "perlobj-type"=>1,
                   "meta"=>1,
                   "apply"=>1,
-                  append=>1,
+                  "append"=>1,
                   "keys"=>1,
                   "namespace-begin"=>1,
                   "namespace-end"=>1,
@@ -234,7 +235,16 @@ package CljPerl::Evaler;
                   "equal"=>1,
                   "require"=>1,
 		  "read"=>1,
-	          println=>1, 
+	          "println"=>1, 
+                  "coro"=>1,
+                  "coro-suspend"=>1,
+                  "coro-sleep"=>1,
+                  "coro-yield"=>1,
+                  "coro-resume"=>1,
+                  "coro-wake"=>1,
+                  "coro-join"=>1,
+                  "coro-current"=>1,
+                  "coro-main"=>1,
                   "xml-name"=>1,
                   "trace-vars"=>1};
 
@@ -1111,6 +1121,58 @@ package CljPerl::Evaler;
       $ast->error("println expects 1 argument") if $size != 2;
       print CljPerl::Printer::to_string($self->_eval($ast->second())) . "\n";
       return $nil;
+    } elsif($fn eq "coro") {
+      $ast->error("coro expects 1 argument") if $size != 2;
+      my $b = $self->_eval($ast->second());
+      $ast->error("core expects a function as argument but got " . $b->type()) if $b->type() ne "function";
+      my $coro = new Coro sub {
+        my $evaler = CljPerl::Evaler->new();
+        my $fc = CljPerl::Seq->new("list");
+        $fc->append($b);
+        $evaler->_eval($fc);
+      };
+      $coro->ready();
+      return CljPerl::Atom->new("coroutine", $coro);
+    } elsif($fn eq "coro-suspend") {
+      $ast->error("coro-suspend expects 1 argument") if $size != 2;                              
+      my $coro = $self->_eval($ast->second());
+      $ast->error("coro-suspend expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
+      $coro->value()->suspend();
+      return $coro;
+    } elsif($fn eq "coro-sleep") {
+      $ast->error("coro-sleep expects 0 argument") if $size != 1;                              
+      $Coro::current->suspend();
+      cede;
+      return CljPerl::Atom->new("coroutine", $Coro::current);
+    } elsif($fn eq "coro-yield") {
+      $ast->error("coro-yield expects 0 argument") if $size != 1;                              
+      cede;
+      return CljPerl::Atom->new("coroutine", $Coro::current);
+    } elsif($fn eq "coro-resume") {
+      $ast->error("coro-resume expects 1 argument") if $size != 2;                              
+      my $coro = $self->_eval($ast->second());
+      $ast->error("coro-resume expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
+      $coro->value()->resume();
+      $coro->value()->cede_to();
+      return $coro;                                                                              
+    } elsif($fn eq "coro-wake") {
+      $ast->error("coro-wake expects 1 argument") if $size != 2;                              
+      my $coro = $self->_eval($ast->second());
+      $ast->error("coro-wake expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
+      $coro->value()->resume();
+      return $coro;
+    } elsif($fn eq "join-coro") {
+      $ast->error("join-coro expects 1 argument") if $size != 2;                              
+      my $coro = $self->_eval($ast->second());
+      $ast->error("join-coro expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
+      $coro->value()->join();                                                                                     
+      return $coro;
+    } elsif($fn eq "coro-current") {
+      $ast->error("coro-current expects 0 argument") if $size != 1;                             
+      return CljPerl::Atom->new("coroutine", $Coro::current);                                                                                                                                        
+    } elsif($fn eq "coro-main") {
+      $ast->error("coro-main expects 0 argument") if $size != 1;                              
+      return CljPerl::Atom->new("coroutine", $Coro::main);                             
     } elsif($fn eq "trace-vars") {
       $ast->error("trace-vars expects 0 argument") if $size != 1;
       $self->trace_vars();

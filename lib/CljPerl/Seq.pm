@@ -6,7 +6,7 @@ package CljPerl::Seq;
   use CljPerl::Logger;
   use CljPerl::Printer;
 
-  our $VERSION = '0.09';
+  our $VERSION = '0.10';
   our $id = 0;
 
   sub new {

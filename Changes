@@ -27,4 +27,5 @@ Revision history for Perl extension CljPerl.
 	- Set key of map with nil to delete key. 
 0.10  TBD
 	- Add exception throw/catch.
-	- Add cond
+	- Add cond form.
+	- Add coroutine support.

@@ -73,3 +73,7 @@
 (defn env [n]
   (. get_env n))
 
+; coroutine
+
+(defmacro coroutine [ & body]
+  `(coro (fn [] ~@body)))
