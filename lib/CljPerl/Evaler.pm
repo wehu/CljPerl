@@ -214,6 +214,7 @@ package CljPerl::Evaler;
                   "namespace-end"=>1,
                   "perl->clj"=>1,
                   "clj->string"=>1,
+		  "regexp"=>1,
                   "!"=>1,
                   "not"=>1,
                   "+"=>1,
@@ -827,6 +828,11 @@ package CljPerl::Evaler;
         $res = $self->_eval($i);
       }
       return $res;
+    } elsif($fn eq "regexp") {
+      $ast->error("regexp expects 1 argument") if $size != 2;
+      my $r = $self->_eval($ast->second());
+      $ast->error("regexp expects a string as argument but got " . $r->type()) if $r->type() ne "string";
+      return CljPerl::Atom->new("regexp", qr/$r/);
     # + - & / % operations
     } elsif($fn =~ /^(\+|\-|\*|\/|\%)$/) {
       $ast->error($fn . " expects 2 arguments") if $size != 3;
@@ -1315,8 +1321,8 @@ package CljPerl::Evaler;
     my $type = $ast->type();
     my $value = $ast->value();
     if($type eq "string" or $type eq "number"
-       or $type eq "quotation" or $type eq "keyword"
-       or $type eq "perlobject") {
+       or $type eq "quotation" or $type eq "keyword" 
+       or $type eq "perlobject" or $type eq "regexp") {
       return $value;
     } elsif($type eq "bool") {
       if($value eq "true") {
@@ -1369,6 +1375,8 @@ package CljPerl::Evaler;
       return CljPerl::Atom->new("string", $v);
     } elsif(ref($v) eq "SCALAR") {
       return CljPerl::Atom->new("string", ${$v});
+    } elsif(ref($v) eq "Regexp") {
+      return CljPerl::Atom->new("regexp", $v);
     } elsif(ref($v) eq "HASH") {
       my %m = ();
       foreach my $k (keys %{$v}) {
