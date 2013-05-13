@@ -50,12 +50,12 @@ make use of the great resources from CPAN.
 	(coro-resume c)
 
 
-	(def a0 (actor
+	(def a (actor
 	  (println "a")
 	  (actor-send (actor-receive) "exit")
 	  (println "b")))
 
-	(actor-send a0 (actor-self))
+	(actor-send a (actor-self))
 	(println (actor-receive "exit")
 
 	------------------
