@@ -1383,6 +1383,8 @@ package CljPerl::Evaler;
       return CljPerl::Atom->new("vector", \@a);
     } elsif(ref($v) eq "CODE") {
       return CljPerl::Atom->new("perlfunction", $v);
+    } elsif(ref($v) eq "Coro") {
+      return CljPerl::Atom->new("coroutine", $v);
     } elsif(ref($v) eq "threads::lite::tid") {
       return CljPerl::Atom->new("actor", $v);
     } else {
