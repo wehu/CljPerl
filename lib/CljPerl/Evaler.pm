@@ -8,6 +8,7 @@ package CljPerl::Evaler;
   use File::Spec;
   use File::Basename;
   use Coro;
+  use threads::lite;
 
   our $VERSION = '0.10';
 
@@ -245,13 +246,18 @@ package CljPerl::Evaler;
                   "coro-join"=>1,
                   "coro-current"=>1,
                   "coro-main"=>1,
+		  "actor"=>1,
+		  "actor-send"=>1,
+		  "actor-receive"=>1,
+		  "actor-receive-nb"=>1,
+		  "actor-self"=>1,
                   "xml-name"=>1,
                   "trace-vars"=>1};
 
   our $empty_list = CljPerl::Seq->new("list");
-  our $true = CljPerl::Atom->new("bool", "true");
-  our $false = CljPerl::Atom->new("bool", "false");
-  our $nil = CljPerl::Atom->new("nil", "nil");
+  our $true       = CljPerl::Atom->new("bool", "true");
+  our $false      = CljPerl::Atom->new("bool", "false");
+  our $nil        = CljPerl::Atom->new("nil", "nil");
 
   sub bind {
     my $self = shift;
@@ -891,11 +897,11 @@ package CljPerl::Evaler;
       } else {
         return $false;
       };
-    # (! true_or_false)
-    } elsif($fn eq "!" or $fn eq "not") {
-      $ast->error("!/not expects 1 argument") if $size != 2;
+    # (not true_or_false)
+    } elsif($fn eq "not") {
+      $ast->error("not expects 1 argument") if $size != 2;
       my $v = $self->_eval($ast->second());
-      $ast->error("!/not expects a bool as the first argument but got " . $v->type()) if $v->type() ne "bool";
+      $ast->error("not expects a bool as the first argument but got " . $v->type()) if $v->type() ne "bool";
       if($v->value() eq "true") {
         return $false;
       } else {
@@ -1161,18 +1167,56 @@ package CljPerl::Evaler;
       $ast->error("coro-wake expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
       $coro->value()->resume();
       return $coro;
-    } elsif($fn eq "join-coro") {
-      $ast->error("join-coro expects 1 argument") if $size != 2;                              
+    } elsif($fn eq "coro-join") {
+      $ast->error("coro-join expects 1 argument") if $size != 2;                              
       my $coro = $self->_eval($ast->second());
-      $ast->error("join-coro expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
+      $ast->error("coro-join expects a coroutine as argument but got " . $coro->type()) if $coro->type() ne "coroutine";
       $coro->value()->join();                                                                                     
       return $coro;
     } elsif($fn eq "coro-current") {
       $ast->error("coro-current expects 0 argument") if $size != 1;                             
-      return CljPerl::Atom->new("coroutine", $Coro::current);                                                                                                                                        
+      return CljPerl::Atom->new("coroutine", $Coro::current); 
     } elsif($fn eq "coro-main") {
       $ast->error("coro-main expects 0 argument") if $size != 1;                              
-      return CljPerl::Atom->new("coroutine", $Coro::main);                             
+      return CljPerl::Atom->new("coroutine", $Coro::main);
+    } elsif($fn eq "actor") {
+      $ast->error("actor expects > 1 argument") if $size == 1;
+      my @body = $ast->slice(1 .. $size-1); 
+      my $actor = threads::lite::spawn({monitor=>1, modules=>["CljPerl"]}, sub {
+        my $evaler = CljPerl::Evaler->new();
+	my $res = $nil;
+	my $body = threads::lite::receiveq;
+	foreach my $b (@{$body}) {
+	  $res = $evaler->_eval($b);
+        };
+        return $res;
+      });
+      $actor->send(\@body);
+      return CljPerl::Atom->new("actor", $actor);
+    } elsif($fn eq "actor-send") {
+      $ast->error("actor-send expects 2 arguments") if $size != 3;                              
+      my $actor = $self->_eval($ast->second());
+      $ast->error("actor-send expects a actor as argument but got " . $actor->type()) if $actor->type() ne "actor";
+      my $value = $self->_eval($ast->third());
+      $actor->value()->send($self->clj2perl($value));
+      return $value;
+    } elsif($fn eq "actor-receive") {
+      my @args = $ast->slice(1 .. $size-1);
+      my @nargs = ();
+      foreach my $arg (@args) {
+        push @nargs, $self->clj2perl($self->_eval($arg));
+      };
+      return &perl2clj(threads::lite::receiveq(@nargs));
+    } elsif($fn eq "actor-receive-nb") {
+      my @args = $ast->slice(1 .. $size-1);
+      my @nargs = ();
+      foreach my $arg (@args) {
+        push @nargs, $self->clj2perl($self->_eval($arg));
+      };
+      return &perl2clj(threads::lite::receiveq_nb(@nargs));
+    } elsif($fn eq "actor-self") {
+      $ast->error("actor-self expects 0 argument") if $size != 1;            
+      return CljPerl::Atom->new("actor", threads::lite::self());
     } elsif($fn eq "trace-vars") {
       $ast->error("trace-vars expects 0 argument") if $size != 1;
       $self->trace_vars();
@@ -1306,7 +1350,8 @@ package CljPerl::Evaler;
       };
       return $f;
     } else {
-      $ast->error("unsupported type " . $type . " for clj2perl object conversion");
+	    #$ast->error("unsupported type " . $type . " for clj2perl object conversion");
+      return $value;
     }
   }
 
@@ -1338,6 +1383,8 @@ package CljPerl::Evaler;
       return CljPerl::Atom->new("vector", \@a);
     } elsif(ref($v) eq "CODE") {
       return CljPerl::Atom->new("perlfunction", $v);
+    } elsif(ref($v) eq "threads::lite::tid") {
+      return CljPerl::Atom->new("actor", $v);
     } else {
       return CljPerl::Atom->new("perlobject", $v);
       #$ast->error("expect a reference of scalar or hash or array");

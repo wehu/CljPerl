@@ -12,6 +12,7 @@ make use of the great resources from CPAN.
 
  * Seamless connection with Perl.
  * Coroutine.
+ * Actor.(experimental)
  * Native XML form which could be used to create web page template.
 
 ## Example
@@ -47,6 +48,15 @@ make use of the great resources from CPAN.
 	(coro-resume c)
 	(println "c")
 	(coro-resume c)
+
+
+	(def a0 (actor
+	  (println "a")
+	  (actor-send (actor-receive) "exit")
+	  (println "b")))
+
+	(actor-send a0 (actor-self))
+	(println (actor-receive "exit")
 
 	------------------
 
