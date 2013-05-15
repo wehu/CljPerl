@@ -45,6 +45,8 @@ make use of the great resources from CPAN.</p>
 
 <ul>
 <li>Seamless connection with Perl.</li>
+<li>Coroutine.</li>
+<li>Actor.(experimental)</li>
 <li>Native XML form which could be used to create web page template.</li>
 </ul><h2>Example</h2>
 
@@ -69,6 +71,25 @@ make use of the great resources from CPAN.</p>
 (defmethod mf "keyword" [a] (println "keyword"))
 (mf "test")
 (mf :test)
+
+(def c (coroutine
+  (println "b")
+  (coro-sleep)
+  (println "d")))
+
+(println "a")
+(coro-resume c)
+(println "c")
+(coro-resume c)
+
+
+(def a (actor
+  (println "a")
+  (actor-send (actor-receive) "exit")
+  (println "b")))
+
+(actor-send a (actor-self))
+(println (actor-receive "exit")
 
 ------------------
 
@@ -179,27 +200,26 @@ sub readline {
 (require quoi/menu)
 
 ; create a menu
-(def menu (quot#menu
-  ["Home" "/home$" "home.clp"]
-  ["About" "/about$" "about.clp"]))
+(def menu (quoi#menu
+  ["Home" "home" (quoi#file "index.clp")]
+  ["About" "about" (quoi#file "about.clp")]))
 
 ; set the index page.
 (quoi#page "/$"
-  (fn [S] (read "index.clp")))
+  (quoi#file "index.clp"))
 
 (quoi#start {:port 9090})
 </code></pre>
 
 <h4>Template : index.clp</h4>
 
-<pre><code>#[html
-  #[body
-    #[h1 "hello world"]
-    #[p "url: " (#::path S)]
-    #[p "method: " (#::method S)]
-    #[p "params: " (clj-&gt;string (#::params S))]
-    #[p "headers: " (clj-&gt;string (#::headers S))] 
-    menu]]
+<pre><code>#[span
+  #[h1 "hello world"]
+  #[p "url: " (#::path S)]
+  #[p "method: " (#::method S)]
+  #[p "params: " (clj-&gt;string (#::params S))]
+  #[p "headers: " (clj-&gt;string (#::headers S))] 
+  menu]
 </code></pre>
 
 <h4>Run</h4>
@@ -217,6 +237,15 @@ sub readline {
   (fn [xml]
     #[span "bar"])) ; &lt;html&gt;hello&lt;span&gt;bar&lt;/bar&gt;&lt;/html&gt;
 </code></pre>
+
+<h4>Quoi demo</h4>
+
+<ul>
+<li>A web server hosted on OpenShift: <a href="http://quoi-wehu.rhcloud.com">quoi-wehu.rhcloud.com</a>
+</li>
+<li>Source code: <a href="https://github.com/wehu/quoi">quoi</a>
+</li>
+</ul>
       </section>
     </div>
 
